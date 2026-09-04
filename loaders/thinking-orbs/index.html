@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thinking Orbs — nine loading indicators</title>
+<style>
+  :root{
+    --accent:#2f9e8a;
+    --accent-dark:#237f6e;
+    --accent-light:#79c9b7;
+    --ink:#1f2a28;
+    --muted:#5f716c;
+    --bg:#f4f7f6;
+    --card:#ffffff;
+    --stage:#f0f5f3;
+    --line:#e2ebe8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.92em}
+
+  header{
+    padding:24px 32px 18px; border-bottom:1px solid var(--line);
+    background:var(--card); position:sticky; top:0; z-index:20;
+  }
+  .back{
+    font-size:12.5px; font-weight:600; color:var(--accent-dark); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:10px;
+  }
+  .back:hover{color:var(--accent)}
+  header h1{font-size:20px; font-weight:700; letter-spacing:-.01em}
+  header h1 span{color:var(--accent)}
+  header p{font-size:13px; color:var(--muted); max-width:78ch; margin-top:4px}
+
+  main{padding:26px 32px 90px; max-width:1120px; margin:0 auto}
+  section{margin-bottom:38px}
+  h2{font-size:15px; font-weight:700; letter-spacing:-.01em; margin-bottom:4px}
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:14px; max-width:78ch}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px}
+
+  /* ---- controls ---- */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:16px 26px; align-items:center;
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:14px 18px; margin-bottom:20px;
+  }
+  .ctl{display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600}
+  .ctl label{color:var(--muted); font-weight:600}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+  .seg button{
+    appearance:none; border:0; background:var(--card); color:var(--muted);
+    font:inherit; font-size:12px; font-weight:600; padding:6px 12px; cursor:pointer;
+  }
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+  input[type=range]{width:120px; accent-color:var(--accent)}
+  .val{font-variant-numeric:tabular-nums; min-width:36px}
+
+  /* ---- the nine ---- */
+  .nine{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px}
+  .state{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:0; overflow:hidden; display:flex; flex-direction:column;
+  }
+  .state .well{
+    background:var(--stage); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; min-height:150px; padding:16px;
+  }
+  .state .meta{padding:13px 15px 15px}
+  .state .name{font-size:13.5px; font-weight:700}
+  .state .name em{font-style:normal; color:var(--accent-dark); font-weight:600; font-size:11.5px}
+  .state .desc{font-size:11.8px; color:var(--muted); margin-top:3px; line-height:1.45}
+  .state .stat{
+    font-size:10.5px; color:var(--muted); margin-top:8px; padding-top:8px;
+    border-top:1px dashed var(--line); font-variant-numeric:tabular-nums;
+  }
+  body.dark-stage .state .well{background:#12201d; border-bottom-color:#1e332e}
+
+  /* ---- size ladder ---- */
+  .ladder{display:flex; flex-wrap:wrap; gap:14px}
+  .ladder .cell{
+    flex:1 1 140px; background:var(--stage); border:1px solid var(--line); border-radius:12px;
+    padding:20px 12px 12px; display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+  body.dark-stage .ladder .cell{background:#12201d; border-color:#1e332e}
+  .cell .cap{font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.04em; text-transform:uppercase}
+  .orbhost{display:flex; align-items:center; justify-content:center}
+  .ladder .orbhost{min-height:132px}
+
+  /* ---- in context ---- */
+  .inline-demo{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--muted)}
+  .btn{
+    appearance:none; border:0; border-radius:9px; background:var(--accent); color:#fff;
+    font:inherit; font-size:13px; font-weight:700; padding:11px 20px; cursor:pointer;
+  }
+  .btn:hover{background:var(--accent-dark)}
+  .btn.ghost{background:transparent; color:var(--accent-dark); border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--stage)}
+  .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+
+  table.rec{width:100%; border-collapse:collapse; font-size:12.5px}
+  table.rec th{
+    text-align:left; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); padding:0 12px 8px 0; border-bottom:1px solid var(--line);
+  }
+  table.rec td{padding:10px 12px 10px 0; border-bottom:1px solid var(--line); vertical-align:top}
+  table.rec tr:last-child td{border-bottom:0}
+  table.rec td.st{font-weight:700; white-space:nowrap}
+  table.rec td.st .orbhost{display:inline-flex; vertical-align:middle; margin-right:8px}
+
+  pre{
+    background:#12201d; color:#d5e5e0; border-radius:10px; padding:16px 18px;
+    overflow-x:auto; font-size:12px; line-height:1.65; margin-top:12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  pre .c{color:#6f8f86}
+  pre .k{color:#79c9b7}
+
+  ul.notes{margin:10px 0 0 18px; font-size:12.5px; color:var(--muted)}
+  ul.notes li{margin-bottom:5px}
+  ul.notes strong{color:var(--ink)}
+
+  /* ---- full-screen overlay ---- */
+  #overlay{
+    position:fixed; inset:0; z-index:100; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    background:#f7faf9;
+  }
+  #overlay.dark{background:#0d1917}
+  #overlay.show{display:flex}
+  #overlay.fade{opacity:0; transition:opacity .45s ease}
+  #overlay .label{
+    font-size:12.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-dark);
+  }
+  #overlay.dark .label{color:var(--accent-light)}
+  #overlay .hint{font-size:11.5px; color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="../../index.html">&larr; Orb Loaders catalogue</a>
+  <h1>Thinking Orbs <span>— all nine loaders</span></h1>
+  <p>Every state from <a href="https://github.com/Jakubantalik/thinking-orbs">thinking-orbs</a>, ported to
+     dependency-free vanilla JS — no React, no framework, no build step. Plain 2D canvas: no WebGL, no filters,
+     no SVG. Geometry is verified <strong>exactly identical</strong> to the upstream engine for all nine
+     states at both tuned sizes; only the ink is re-tinted from grayscale to the chosen palette.</p>
+</header>
+
+<main>
+
+  <div class="controls">
+    <div class="ctl">
+      <label>Palette</label>
+      <div class="seg" id="seg-palette">
+        <button data-v="jade" aria-pressed="true">Jade</button>
+        <button data-v="slate" aria-pressed="false">Slate</button>
+        <button data-v="mono" aria-pressed="false">Mono</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>Theme</label>
+      <div class="seg" id="seg-theme">
+        <button data-v="light" aria-pressed="true">Light</button>
+        <button data-v="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label>Dot scale</label>
+      <div class="seg" id="seg-scale">
+        <button data-v="zoom" aria-pressed="true">Zoom</button>
+        <button data-v="tuned" aria-pressed="false">Upstream</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label for="speed">Speed</label>
+      <input type="range" id="speed" min="0.3" max="2.5" step="0.1" value="1" />
+      <span class="val" id="speed-val">1.0&times;</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>1 &middot; The nine states</h2>
+    <p class="sub">Nine verbs an agent can be doing, each a distinct animation. All shown at 96&nbsp;px.
+       Dot counts are per frame, measured from the running port.</p>
+    <div class="nine" id="nine"></div>
+  </section>
+
+  <section>
+    <h2>2 &middot; One state, every size</h2>
+    <p class="sub">Upstream ships two hand-tuned designs (64&nbsp;px and 20&nbsp;px) — separate designs,
+       not a scale factor. The port picks the 20&nbsp;px design at or below 32&nbsp;px and the 64&nbsp;px
+       one above. <strong>Zoom</strong> then scales that design linearly so it reads the same at any size;
+       <strong>Upstream</strong> keeps the library's <code>(size/300)^0.6</code> curve, correct at 64&nbsp;px
+       but faint as a hero.</p>
+    <div class="controls" style="margin-bottom:14px">
+      <div class="ctl"><label>State</label><div class="seg" id="seg-ladder"></div></div>
+    </div>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <section>
+    <h2>3 &middot; In context</h2>
+    <p class="sub">The full-screen loader uses whichever state is selected above.</p>
+    <div class="card">
+      <div class="inline-demo">
+        <div class="orbhost" id="inline-orb"></div>
+        <span>Inline, beside a form button — <em>Submitting&hellip;</em></span>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="show-overlay">Show full-screen loading screen</button>
+        <button class="btn ghost" id="show-overlay-dark">Show it dark</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 &middot; Which one goes where</h2>
+    <p class="sub">A starting point, not a rule. Pick by what the wait actually is —
+       calm states for a whole-page wait, busier ones for short async work.</p>
+    <div class="card">
+      <table class="rec" id="rec">
+        <thead><tr><th>State</th><th>Use it for</th><th>Why</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>5 &middot; Dropping it into a page</h2>
+    <p class="sub">One file, no build step, no dependency.</p>
+    <div class="card">
+<pre><span class="c">// load it — UMD, so a script tag or a bundler import both work</span>
+&lt;script src="thinking-orb.js"&gt;&lt;/script&gt;
+
+<span class="c">// markup — a bare host element</span>
+&lt;div id="site-loader"&gt;&lt;div class="orb"&gt;&lt;/div&gt;&lt;p&gt;Loading&lt;/p&gt;&lt;/div&gt;
+
+<span class="c">// mount, then tear down when the wait ends</span>
+<span class="k">const</span> orb = ThinkingOrb.mount(document.querySelector(<span class="k">'#site-loader .orb'</span>), {
+  state: <span class="k">'breathing'</span>,   <span class="c">// any of the nine</span>
+  size: 96,
+  palette: <span class="k">'jade'</span>,       <span class="c">// 'jade' | 'slate' | 'mono'</span>
+  theme: <span class="k">'light'</span>,        <span class="c">// 'light' | 'dark'</span>
+  zoom: <span class="k">true</span>,            <span class="c">// scale the tuned design up; leave off at/below 64px</span>
+  speed: 1,
+  label: <span class="k">'Loading'</span>
+});
+
+window.addEventListener(<span class="k">'load'</span>, () =&gt; {
+  document.getElementById(<span class="k">'site-loader'</span>).classList.add(<span class="k">'fade'</span>);
+  setTimeout(() =&gt; orb.destroy(), 500);   <span class="c">// stops the rAF loop</span>
+});</pre>
+      <ul class="notes">
+        <li><strong>Cost:</strong> all nine states in one file — 32&nbsp;KB as authored (10&nbsp;KB gzipped),
+            15&nbsp;KB minified (<strong>6.6&nbsp;KB gzipped</strong>). Zero dependencies, zero network requests.</li>
+        <li><strong>Frames:</strong> pauses itself when scrolled offscreen or the tab is hidden, so an idle loader costs nothing.</li>
+        <li><strong>Accessibility:</strong> <code>role="img"</code> with a per-state label; <code>prefers-reduced-motion</code> paints one static frame and never animates.</li>
+        <li><strong>Licence:</strong> upstream is MIT — attribution is in the file header.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<div id="overlay" role="status" aria-live="polite">
+  <div class="orbhost" id="overlay-orb"></div>
+  <div class="label" id="overlay-label">Loading</div>
+  <div class="hint">closes in 3s — or click anywhere</div>
+</div>
+
+<script src="thinking-orb.js"></script>
+<script>
+(function () {
+  var STATES = [
+    ['working',    'particles on tilted orbits'],
+    ['searching',  'a scan meridian sweeps a dotted globe'],
+    ['solving',    'bands scramble, then click back solved'],
+    ['listening',  'a waveform rolls through the rings'],
+    ['connecting', 'a constellation wires itself, signals running the edges'],
+    ['weaving',    'three strands plait around the sphere'],
+    ['composing',  'an undulating multi-band sash'],
+    ['breathing',  'a ring slowly morphing'],
+    ['shaping',    'dotted outline: circle, triangle, square']
+  ];
+
+  var RECOMMEND = [
+    ['breathing',  'Site-wide page loader',                'Calmest of the nine. Reads as a breath, not as a machine thinking.'],
+    ['working',    'Generic async spinner, form submits',  'The default. Busy enough to say "something is happening", short enough not to hypnotise.'],
+    ['searching',  'Search, filter, scoring a result','The sweep literally reads as looking through something.'],
+    ['connecting', 'Talking to a third-party API',          'Nodes wiring up reads as "we are talking to something else".'],
+    ['shaping',    'Very short inline waits',              'Only 24 dots — legible at 20px where the sphere states turn to mush.']
+  ];
+
+  var LADDER_SIZES = [128, 96, 64, 40, 24, 20];
+
+  var state = { palette: 'jade', theme: 'light', scale: 'zoom', speed: 1, ladder: 'breathing' };
+  var instances = [];
+
+  function opts(extra) {
+    var base = {
+      palette: state.palette,
+      theme: state.theme,
+      zoom: state.scale === 'zoom',
+      speed: state.speed
+    };
+    for (var k in extra) base[k] = extra[k];
+    return base;
+  }
+
+  function mountInto(host) {
+    instances.push(ThinkingOrb.mount(host, opts({
+      state: host.dataset.state,
+      size: Number(host.dataset.size)
+    })));
+  }
+
+  /* ---- build the nine ---- */
+  var nine = document.getElementById('nine');
+  STATES.forEach(function (s) {
+    var mode = ThinkingOrb.STATE_TO_MODE[s[0]];
+    var res = ThinkingOrb.resolve(s[0], 64);
+    var rs = Math.pow(64 / 300, res.opts.rsPow || 0.6);
+    var frame = ThinkingOrb._frame(mode, 64, 1.37, res.opts, rs);
+    var stat = frame.dots.length + ' dots' + (frame.lines.length ? ' + ' + frame.lines.length + ' lines' : '') +
+               ' &middot; painter <code>' + mode + '</code>';
+
+    var el = document.createElement('div');
+    el.className = 'state';
+    el.innerHTML =
+      '<div class="well"><div class="orbhost" data-state="' + s[0] + '" data-size="96"></div></div>' +
+      '<div class="meta">' +
+        '<div class="name">' + s[0] + ' <em>&middot; ' + ThinkingOrb.STATE_LABEL[s[0]] + '</em></div>' +
+        '<div class="desc">' + s[1] + '</div>' +
+        '<div class="stat">' + stat + '</div>' +
+      '</div>';
+    nine.appendChild(el);
+  });
+
+  /* ---- build the ladder + its state picker ---- */
+  var ladderSeg = document.getElementById('seg-ladder');
+  STATES.forEach(function (s) {
+    var b = document.createElement('button');
+    b.dataset.v = s[0];
+    b.textContent = s[0];
+    b.setAttribute('aria-pressed', String(s[0] === state.ladder));
+    ladderSeg.appendChild(b);
+  });
+
+  var ladder = document.getElementById('ladder');
+  function buildLadder() {
+    ladder.innerHTML = '';
+    LADDER_SIZES.forEach(function (sz) {
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.innerHTML = '<div class="orbhost" data-state="' + state.ladder + '" data-size="' + sz + '"></div>' +
+                       '<div class="cap">' + sz + ' px</div>';
+      ladder.appendChild(cell);
+    });
+  }
+
+  /* ---- build the recommendation table ---- */
+  var recBody = document.querySelector('#rec tbody');
+  RECOMMEND.forEach(function (r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="st"><span class="orbhost" data-state="' + r[0] + '" data-size="32"></span>' + r[0] + '</td>' +
+      '<td>' + r[1] + '</td><td>' + r[2] + '</td>';
+    recBody.appendChild(tr);
+  });
+
+  /* ---- inline demo host ---- */
+  var inlineHost = document.getElementById('inline-orb');
+  inlineHost.dataset.state = 'working';
+  inlineHost.dataset.size = '20';
+
+  /* ---- render ---- */
+  function render() {
+    instances.forEach(function (o) { o.destroy(); });
+    instances = [];
+    document.body.classList.toggle('dark-stage', state.theme === 'dark');
+    Array.prototype.forEach.call(document.querySelectorAll('.orbhost[data-state]'), mountInto);
+  }
+
+  function segment(id, key, before) {
+    var root = document.getElementById(id);
+    root.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      state[key] = btn.dataset.v;
+      Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      if (before) before();
+      render();
+    });
+  }
+
+  segment('seg-palette', 'palette');
+  segment('seg-theme', 'theme');
+  segment('seg-scale', 'scale');
+  segment('seg-ladder', 'ladder', buildLadder);
+
+  var speed = document.getElementById('speed');
+  var speedVal = document.getElementById('speed-val');
+  speed.addEventListener('input', function () {
+    state.speed = Number(speed.value);
+    speedVal.textContent = state.speed.toFixed(1) + '×';
+    render();
+  });
+
+  buildLadder();
+  render();
+
+  /* ---- full-screen overlay ---- */
+  var overlay = document.getElementById('overlay');
+  var overlayHost = document.getElementById('overlay-orb');
+  var overlayLabel = document.getElementById('overlay-label');
+  var overlayOrb = null, timer = null;
+
+  function openOverlay(dark) {
+    closeOverlay();
+    overlay.classList.toggle('dark', dark);
+    overlay.classList.remove('fade');
+    overlay.classList.add('show');
+    
+    overlayLabel.textContent = ThinkingOrb.STATE_LABEL[state.ladder].replace('…', '');
+    overlayOrb = ThinkingOrb.mount(overlayHost, opts({
+      state: state.ladder,
+      size: 96,
+      theme: dark ? 'dark' : 'light',
+      label: 'Loading'
+    }));
+    timer = setTimeout(function () {
+      overlay.classList.add('fade');
+      setTimeout(closeOverlay, 460);
+    }, 3000);
+  }
+
+  function closeOverlay() {
+    clearTimeout(timer);
+    if (overlayOrb) { overlayOrb.destroy(); overlayOrb = null; }
+    overlay.classList.remove('show', 'fade');
+  }
+
+  document.getElementById('show-overlay').addEventListener('click', function () { openOverlay(false); });
+  document.getElementById('show-overlay-dark').addEventListener('click', function () { openOverlay(true); });
+  overlay.addEventListener('click', closeOverlay);
+})();
+</script>
+
+</body>
+</html>
