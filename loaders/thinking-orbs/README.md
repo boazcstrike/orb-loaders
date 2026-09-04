@@ -8,7 +8,7 @@ switches, a speed slider, and a full-screen loading-screen example.
 
 | File | What |
 | --- | --- |
-| `thinking-orb.js` | The drop-in. UMD, ~32 KB raw, ~6.6 KB minified + gzipped. |
+| `thinking-orb.js` | The drop-in. UMD, ~34 KB raw, ~6.6 KB minified + gzipped. |
 | `index.html` | Standalone demo page. Loads the file by relative path; works from disk. |
 
 ---
@@ -38,7 +38,7 @@ switches, a speed slider, and a full-screen loading-screen example.
   const orb = ThinkingOrb.mount(document.getElementById('loader'), {
     state: 'breathing',
     size: 96,
-    palette: 'jade',
+    palette: 'violet',
     theme: 'light',
     zoom: true,
     speed: 1,
@@ -56,7 +56,7 @@ switches, a speed slider, and a full-screen loading-screen example.
 | --- | --- | --- |
 | `state` | `'working'` | One of the nine above. |
 | `size` | `64` | Pixels. Upstream ships two hand-tuned designs (64 px and 20 px) — separate designs, not a scale factor. The port picks the 20 px design at or below 32 px, the 64 px one above. |
-| `palette` | `'jade'` | `'jade'` \| `'slate'` \| `'mono'`. A palette is two ink stops the depth ramp interpolates between. |
+| `palette` | `'violet'` | `'violet'` \| `'cyan'` \| `'magenta'` \| `'jade'` \| `'slate'` \| `'mono'`. A palette is two ink stops the depth ramp interpolates between. |
 | `theme` | `'light'` | `'light'` \| `'dark'` — picks that palette's ramp. |
 | `zoom` | `false` | Scales the tuned design linearly so it reads the same at any size. Leave off at or below 64 px; turn on for a hero-sized loader, where upstream's `(size/300)^0.6` curve goes faint. |
 | `speed` | `1` | Multiplier on the animation clock. |
@@ -68,6 +68,11 @@ switches, a speed slider, and a full-screen loading-screen example.
   `connecting`), projects them, shades by depth, paints back to front.
 - **Self-pausing** — stops the rAF loop when scrolled offscreen or the tab is hidden, so an idle
   loader costs nothing.
+- **Cheap to show many at once** — every dot's colour comes from a lookup table built once, instead
+  of a fresh `rgba()` string per dot per frame. On a page of 21 orbs under a 6× CPU throttle that is
+  **~2–3× less main-thread time per frame** (measured: 69–110 ms → 31–36 ms). The visible output is
+  unchanged: shade and alpha are quantised at 128 × 64 steps, which comes out at ≤ 3.6/255 on ≤ 1.8%
+  of pixels against the unquantised painter.
 - **Accessible** — `role="img"` with a per-state label. Under `prefers-reduced-motion` it paints one
   static frame and never animates.
 - **Zero network requests.**

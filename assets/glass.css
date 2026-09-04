@@ -1,0 +1,254 @@
+/*!
+ * glass.css — shared page chrome for the Orb Loaders catalogue and its demos.
+ *
+ * Slate neutrals, one accent, hairline borders. Dark and light.
+ *
+ * PERFORMANCE — the rule that shapes this file:
+ *   backdrop-filter re-blurs its backdrop every time anything behind it
+ *   repaints. These pages are full of canvases animating at 60fps, so a glass
+ *   card sitting over them re-blurs 60 times a second, and twenty of them will
+ *   drop a fast machine to single-digit frame rates.
+ *
+ *   So backdrop-filter is used on exactly two surfaces — the sticky header and
+ *   the full-screen overlay — both of which sit over *static* content most of
+ *   the time. Everything else gets a flat translucent fill plus a hairline
+ *   border, which reads as the same material and costs one paint.
+ *
+ * Theme resolution: explicit data-theme on <html> (set by theme.js), else the
+ * OS preference, else light.
+ */
+
+/* ============================================================ light tokens */
+
+:root {
+  color-scheme: light;
+
+  --accent:      #6d28d9;
+  --accent-ink:  #5b21b6;   /* text on light surfaces — 7.3:1 on --surface */
+  --accent-soft: rgba(109, 40, 217, .10);
+
+  --bg:        #f6f7fb;
+  --bg-wash:   rgba(109, 40, 217, .07);   /* the single ambient tint */
+
+  --surface:     rgba(255, 255, 255, .72);
+  --surface-2:   rgba(255, 255, 255, .42);   /* recessed wells */
+  --line:        rgba(15, 23, 42, .10);
+  --line-strong: rgba(15, 23, 42, .16);
+  --hairline:    rgba(255, 255, 255, .80);   /* top edge highlight */
+  --shadow:      0 1px 2px rgba(15, 23, 42, .05);
+  --shadow-lg:   0 12px 32px rgba(15, 23, 42, .12);
+
+  --ink:      #0f172a;
+  --muted:    #55607a;
+  --code-bg:  #0f1523;
+  --code-ink: #dfe3f0;
+}
+
+/* Dark by OS preference — but never when the toggle has pinned light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --accent:      #8b5cf6;
+    --accent-ink:  #a78bfa;
+    --accent-soft: rgba(139, 92, 246, .14);
+
+    --bg:        #0a0d16;
+    --bg-wash:   rgba(139, 92, 246, .10);
+
+    --surface:     rgba(255, 255, 255, .045);
+    --surface-2:   rgba(255, 255, 255, .022);
+    --line:        rgba(255, 255, 255, .09);
+    --line-strong: rgba(255, 255, 255, .16);
+    --hairline:    rgba(255, 255, 255, .14);
+    --shadow:      0 1px 2px rgba(0, 0, 0, .30);
+    --shadow-lg:   0 12px 32px rgba(0, 0, 0, .45);
+
+    --ink:      #edf0f7;
+    --muted:    #949db8;
+    --code-bg:  rgba(255, 255, 255, .04);
+    --code-ink: #dfe3f0;
+  }
+}
+
+/* The toggle wins in both directions. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --accent:      #8b5cf6;
+  --accent-ink:  #a78bfa;
+  --accent-soft: rgba(139, 92, 246, .14);
+
+  --bg:        #0a0d16;
+  --bg-wash:   rgba(139, 92, 246, .10);
+
+  --surface:     rgba(255, 255, 255, .045);
+  --surface-2:   rgba(255, 255, 255, .022);
+  --line:        rgba(255, 255, 255, .09);
+  --line-strong: rgba(255, 255, 255, .16);
+  --hairline:    rgba(255, 255, 255, .14);
+  --shadow:      0 1px 2px rgba(0, 0, 0, .30);
+  --shadow-lg:   0 12px 32px rgba(0, 0, 0, .45);
+
+  --ink:      #edf0f7;
+  --muted:    #949db8;
+  --code-bg:  rgba(255, 255, 255, .04);
+  --code-ink: #dfe3f0;
+}
+
+/* ================================================================== base */
+
+* { box-sizing: border-box; margin: 0; padding: 0 }
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* One ambient wash, painted once. No filter, no second layer — a blurred
+     fixed backdrop is an offscreen buffer the compositor redraws all day. */
+  background:
+    radial-gradient(120vmax 80vmax at 50% -20%, var(--bg-wash), transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--ink);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+code, pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+code { font-size: .92em }
+
+a { color: var(--accent-ink) }
+
+/* ============================================================== surfaces */
+
+/* Flat translucent fill — no backdrop-filter. See the header note. */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  /* Paint containment: a canvas repainting inside one card cannot invalidate
+     the others. This is most of the difference on a page of live orbs. */
+  contain: paint;
+}
+
+/* Recessed panel — the stage an orb sits on. */
+.well {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+/* =============================================================== header */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 20px 32px 16px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  /* Affordable here: the header's backdrop is static except while scrolling. */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+/* Where color-mix is unsupported, fall back to the opaque page colour. */
+@supports not (background: color-mix(in srgb, red 50%, transparent)) {
+  .site-header { background: var(--bg) }
+}
+.site-header .bar { display: flex; align-items: flex-start; gap: 20px }
+.site-header .bar > div:first-child { flex: 1; min-width: 0 }
+.site-header h1 { font-size: 20px; font-weight: 650; letter-spacing: -.02em }
+.site-header h1 span { color: var(--accent-ink); font-weight: 500 }
+.site-header p { font-size: 12.5px; color: var(--muted); max-width: 76ch; margin-top: 5px }
+
+.back {
+  font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: none;
+  letter-spacing: .06em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 9px;
+}
+.back:hover { color: var(--accent-ink) }
+
+/* ======================================================== theme toggle */
+
+.theme-toggle {
+  flex: none;
+  appearance: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  font: inherit; font-size: 11.5px; font-weight: 600;
+  color: var(--muted); cursor: pointer;
+  padding: 8px 14px; border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: color .18s ease, border-color .18s ease;
+}
+.theme-toggle:hover { border-color: var(--line-strong); color: var(--ink) }
+.theme-toggle svg { width: 14px; height: 14px; display: block }
+/* One icon per theme; the inactive one is removed, not just hidden. */
+.theme-toggle .i-sun { display: none }
+:root[data-theme="dark"] .theme-toggle .i-sun  { display: block }
+:root[data-theme="dark"] .theme-toggle .i-moon { display: none }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .i-sun  { display: block }
+  :root:not([data-theme="light"]) .theme-toggle .i-moon { display: none }
+}
+
+/* ============================================================== controls */
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.seg button {
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-size: 11.5px; font-weight: 600; padding: 7px 13px; cursor: pointer;
+  transition: color .15s ease, background-color .15s ease;
+}
+.seg button + button { border-left: 1px solid var(--line) }
+.seg button:hover { color: var(--ink) }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff }
+
+.btn {
+  appearance: none; border: 1px solid var(--accent); border-radius: 10px;
+  background: var(--accent); color: #fff;
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  padding: 10px 20px; cursor: pointer;
+  transition: filter .15s ease, border-color .15s ease;
+}
+.btn:hover { filter: brightness(1.12) }
+.btn.ghost {
+  background: transparent; color: var(--ink); border-color: var(--line-strong);
+}
+.btn.ghost:hover { border-color: var(--accent); color: var(--accent-ink); filter: none }
+
+input[type=range] { width: 118px; accent-color: var(--accent) }
+
+/* ================================================================= misc */
+
+.tag {
+  font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--accent-ink); background: var(--accent-soft);
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
+}
+
+pre {
+  background: var(--code-bg); color: var(--code-ink);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px 18px; overflow-x: auto; font-size: 12px; line-height: 1.65; margin-top: 12px;
+}
+pre .c { color: #7b86a3 }
+pre .k { color: #b9a4ff }
+
+::selection { background: var(--accent-soft) }
+
+*:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important }
+}

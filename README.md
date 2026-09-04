@@ -7,7 +7,8 @@ own demo page, its own licence note, and no build step between you and using it.
 The point is to stop re-hunting for the same animation every time a project needs a loading state.
 Copy the folder, load the file, mount it.
 
-**Live catalogue:** open [`index.html`](index.html) in a browser.
+**Live catalogue:** open [`index.html`](index.html) in a browser. The pages follow the OS light/dark
+setting and carry a toggle that overrides it; every loader is shown in whichever theme you pick.
 
 ---
 
@@ -15,7 +16,7 @@ Copy the folder, load the file, mount it.
 
 | Loader | What it is | Tech | Size | Licence |
 | --- | --- | --- | --- | --- |
-| [`thinking-orbs`](loaders/thinking-orbs/) | Nine animated "thinking" states — working, searching, solving, listening, connecting, weaving, composing, breathing, shaping | Vanilla JS, canvas 2D, UMD | 32 KB raw · ~6.6 KB min+gzip | MIT |
+| [`thinking-orbs`](loaders/thinking-orbs/) | Nine animated "thinking" states — working, searching, solving, listening, connecting, weaving, composing, breathing, shaping | Vanilla JS, canvas 2D, UMD | 34 KB raw · ~6.6 KB min+gzip | MIT |
 
 ---
 
@@ -32,7 +33,7 @@ No install, no bundler required. Every loader is a plain file.
   const orb = ThinkingOrb.mount(document.getElementById('loader'), {
     state: 'breathing',   // any of the nine
     size: 96,
-    palette: 'jade',      // 'jade' | 'slate' | 'mono'
+    palette: 'violet',    // violet | cyan | magenta | jade | slate | mono
     theme: 'light',       // 'light' | 'dark'
     zoom: true,           // scale the tuned design up; leave off at/below 64px
     speed: 1,
@@ -66,6 +67,9 @@ orb-loaders/
 ├── index.html                    # catalogue — links every loader's demo
 ├── README.md
 ├── LICENSE                       # MIT, for this repo's own code
+├── assets/
+│   ├── glass.css                 # shared page chrome — tokens, surfaces, header
+│   └── theme.js                  # light/dark toggle, remembers the choice
 └── loaders/
     └── <loader-name>/
         ├── README.md             # what it is, options, upstream + licence
@@ -88,6 +92,9 @@ orb-loaders/
 
 - **No runtime dependencies.** If it needs a framework, port it or leave it out.
 - **No network requests.** No CDN fonts, no remote assets. It has to work offline.
+- **Cheap enough to show a wall of them.** A demo page runs a dozen or more at once. Watch for
+  per-frame string or object allocation, and keep `backdrop-filter` off anything sitting over a live
+  animation — it re-blurs its backdrop on every repaint underneath.
 - **Attribution stays.** Every loader keeps the original author's name and licence.
 - **Nothing proprietary.** No client branding, no private logos, no colour tokens lifted from
   someone's brand system. Palettes here are generic.
