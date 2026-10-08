@@ -3,7 +3,8 @@
 Nine animated "thinking orb" loading indicators in one dependency-free file. Each state is a distinct
 animation for a distinct kind of wait.
 
-**Demo:** open [`index.html`](index.html) — all nine states, a size ladder, palette and theme
+**Demo:** <https://boazcstrike.github.io/orb-loaders/loaders/thinking-orbs/>, or open
+[`index.html`](index.html) locally — all nine states, a size ladder, palette and theme
 switches, a speed slider, and a full-screen loading-screen example.
 
 | File | What |

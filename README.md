@@ -7,16 +7,17 @@ own demo page, its own licence note, and no build step between you and using it.
 The point is to stop re-hunting for the same animation every time a project needs a loading state.
 Copy the folder, load the file, mount it.
 
-**Live catalogue:** open [`index.html`](index.html) in a browser. The pages follow the OS light/dark
-setting and carry a toggle that overrides it; every loader is shown in whichever theme you pick.
+**Live catalogue:** <https://boazcstrike.github.io/orb-loaders/>, or open [`index.html`](index.html)
+locally. The pages follow the OS light/dark setting and carry a toggle that overrides it; every
+loader is shown in whichever theme you pick.
 
 ---
 
 ## Catalogue
 
-| Loader | What it is | Tech | Size | Licence |
-| --- | --- | --- | --- | --- |
-| [`thinking-orbs`](loaders/thinking-orbs/) | Nine animated "thinking" states — working, searching, solving, listening, connecting, weaving, composing, breathing, shaping | Vanilla JS, canvas 2D, UMD | 34 KB raw · ~6.6 KB min+gzip | MIT |
+| Loader | Live demo | What it is | Tech | Size | Licence |
+| --- | --- | --- | --- | --- | --- |
+| [`thinking-orbs`](loaders/thinking-orbs/) | [Open demo](https://boazcstrike.github.io/orb-loaders/loaders/thinking-orbs/) | Nine animated "thinking" states — working, searching, solving, listening, connecting, weaving, composing, breathing, shaping | Vanilla JS, canvas 2D, UMD | 34 KB raw · ~6.6 KB min+gzip | MIT |
 
 ---
 
@@ -86,7 +87,9 @@ orb-loaders/
 3. Add `index.html` — a standalone demo that loads the file by relative path and works when opened
    straight from disk. No CDN, no external requests.
 4. Add `loaders/<loader-name>/README.md`: what it is, the options, the upstream project, the licence.
-5. Add a row to the table above and a card to the root `index.html`.
+5. Add a row to the table above, with its live demo link
+   (`https://boazcstrike.github.io/orb-loaders/loaders/<loader-name>/`), and a card to the root
+   `index.html`.
 
 **Rules for anything vendored here:**
 
