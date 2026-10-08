@@ -33,9 +33,10 @@
  * SOFTWARE.
  *
  * Adapted for orb-loaders: Solid + CSS module + Tailwind removed; plain DOM and scoped
- * `ath-` CSS. Timeline runs on a pausable clock (offscreen / hidden tab stops it), the
- * stream follows the newest line, the live line is emphasised, the timer is tabular and
- * drift-free, reduced motion shows the finished state, optional looping, size option.
+ * `ath-` CSS. Timeline runs on the wall clock (only the shimmer pauses offscreen / hidden,
+ * so onComplete still fires in a background tab), the stream follows the newest line, the
+ * live line is emphasised, the timer is tabular and drift-free, reduced motion shows the
+ * finished state, optional looping, size option.
  * See README.md "Changes from upstream".
  *
  * Usage:
@@ -155,7 +156,7 @@
     collapsible.appendChild(inner);
 
     var live = el('span', 'ath-sr');
-    live.setAttribute('role', 'status');
+    live.setAttribute('role', 'status');   // inserted empty: first text lands on a later tick so SRs announce it
 
     rootEl.appendChild(header);
     rootEl.appendChild(collapsible);
@@ -171,9 +172,9 @@
     var fadeTop = 0;
     var fadeBottom = 0;
     var destroyed = false;
+    var completed = false;             // onComplete fires at most once per run
 
-    /* ---- pausable clock ---- */
-    var elapsed = 0;
+    /* ---- wall clock: keeps advancing while hidden / offscreen, only visuals pause ---- */
     var startedAt = 0;
     var running = false;
     var timer = 0;
@@ -181,7 +182,7 @@
     var offscreen = false;
 
     function now() { return performance.now(); }
-    function readClock() { return running ? elapsed + (now() - startedAt) : elapsed; }
+    function readClock() { return now() - startedAt; }
 
     /* ---- rendering ---- */
     function setLabel() {
@@ -242,14 +243,20 @@
       live.textContent = 'Finished thinking';
       if (autoCollapse) setOpen(false);
       rootEl.setAttribute('data-phase', 'done');
-      if (onComplete) onComplete();
+      complete();
+    }
+
+    function complete() {
+      if (completed || !onComplete) return;
+      completed = true;
+      onComplete();
     }
 
     function restart() {
       while (stream.firstChild) stream.removeChild(stream.firstChild);
       phase = 'thinking';
       revealed = 0;
-      elapsed = 0;
+      completed = false;
       startedAt = now();
       stick = true;
       viewport.scrollTop = 0;
@@ -289,24 +296,12 @@
       schedule();
     }
 
-    function pause() {
-      if (!running) return;
-      elapsed = readClock();
-      running = false;
-      clearTimeout(timer);
-      rootEl.classList.add('is-paused');
-    }
-
-    function resume() {
-      if (running || destroyed || reduceMotion) return;
-      startedAt = now();
-      running = true;
-      rootEl.classList.remove('is-paused');
-      schedule();
-    }
-
+    // Hidden / offscreen freezes the shimmer only; on return, catch the timeline up and render it.
     function syncRunning() {
-      if (hidden || offscreen) pause(); else resume();
+      if (!running || destroyed) return;
+      var paused = hidden || offscreen;
+      rootEl.classList.toggle('is-paused', paused);
+      if (!paused) tick();
     }
 
     /* ---- events ---- */
@@ -347,10 +342,15 @@
       for (var i = 0; i < count; i++) addLine(i, true);
       phase = 'done';
       setLabel();
-      live.textContent = 'Finished thinking';
       rootEl.setAttribute('data-phase', 'done');
+      // Deferred so the live region is in the tree first and the caller already holds the handle.
+      setTimeout(function () {
+        if (destroyed) return;
+        live.textContent = 'Finished thinking';
+        complete();
+      }, 0);
     } else {
-      live.textContent = 'Thinking';
+      setTimeout(function () { if (!destroyed) live.textContent = 'Thinking'; }, 0);
       setLabel();
       startedAt = now();
       running = true;

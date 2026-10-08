@@ -36,10 +36,26 @@
  * loader lays out like a normal inline element; prefers-reduced-motion swaps the
  * motion for a slow opacity pulse. See README.md "Changes from upstream".
  *
- * Usage:   <div class="td-flashing" role="status" aria-label="Loading"></div>
+ * Usage:   <div role="status">
+ *            <div class="td-flashing"></div>
+ *            <span class="td-sr">Loading…</span>
+ *          </div>
  *          colour: set `color` on it or any ancestor.
  *          size:   style="--td-size: 12px"  (dot diameter; default 10px)
  */
+
+/* Visually-hidden text for the role="status" wrapper: read by screen readers, never seen. */
+.td-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ------------------------------------------------------------------ shared */
 

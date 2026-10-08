@@ -30,14 +30,21 @@ examples (button, inline text, panel), and a copyable snippet.
 ```html
 <link rel="stylesheet" href="spinkit.css">
 
-<div class="sk-wave" role="status" aria-label="Loading" style="--sk-size: 48px; color: #6d28d9">
-  <div class="sk-wave-rect"></div>
-  <div class="sk-wave-rect"></div>
-  <div class="sk-wave-rect"></div>
-  <div class="sk-wave-rect"></div>
-  <div class="sk-wave-rect"></div>
+<div role="status">
+  <div class="sk-wave" style="--sk-size: 48px; color: #6d28d9">
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+    <div class="sk-wave-rect"></div>
+  </div>
+  <span class="sk-sr">Loading…</span>
 </div>
 ```
+
+The text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the spinner first, then the text.
 
 Child counts: chase 6, bounce 2, wave 5, flow 3, swing 2, circle-fade 12, grid 9, fold 4. Children
 can be any element; inside a `<button>` use `<i>` or `<span>` rather than `<div>`.

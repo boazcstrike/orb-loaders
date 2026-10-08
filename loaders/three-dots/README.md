@@ -18,18 +18,22 @@ examples and copyable markup.
 
 | Class | Animation | Footprint (in dot diameters) | Accessibility pattern |
 | --- | --- | --- | --- |
-| `.td-flashing` | Three dots fade up in a left-to-right wave. The calmest. | 4 wide | `role="status"` + `aria-label="Loading"` |
-| `.td-pulse` | Dots swell and settle in turn; never shrink to nothing. The general-purpose pick. | 4.5 wide | `role="status"` + `aria-label="Loading"` |
-| `.td-elastic` | A vertical stretch rolls across the row. | 4 wide | `role="status"` + `aria-label="Loading"` |
-| `.td-typing` | Each dot hops and brightens in turn. The chat typing idiom. | 4 wide | `role="status"` + a specific label, e.g. `aria-label="Assistant is replying"` |
-| `.td-falling` | Dots drop in, hold, then fall away. | 4 wide | `role="status"` + `aria-label="Loading"` |
-| `.td-collision` | Newton's cradle: outer dots swing out and strike back. | 6 wide | `role="status"` + `aria-label="Loading"` |
-| `.td-revolution` | Two dots orbit a centre dot at different speeds. | 7 x 7 | `role="status"` + label; use at hero or empty-state size |
-| `.td-windmill` | A triangle of dots turns in eased 120-degree steps. | 3 x 3 | `role="status"` + `aria-label="Loading"` |
+| `.td-flashing` | Three dots fade up in a left-to-right wave. The calmest. | 4 wide | `role="status"` wrapper + `td-sr` text |
+| `.td-pulse` | Dots swell and settle in turn; never shrink to nothing. The general-purpose pick. | 4.5 wide | `role="status"` wrapper + `td-sr` text |
+| `.td-elastic` | A vertical stretch rolls across the row. | 4 wide | `role="status"` wrapper + `td-sr` text |
+| `.td-typing` | Each dot hops and brightens in turn. The chat typing idiom. | 4 wide | `role="status"` wrapper + specific `td-sr` text, e.g. `Assistant is replying` |
+| `.td-falling` | Dots drop in, hold, then fall away. | 4 wide | `role="status"` wrapper + `td-sr` text |
+| `.td-collision` | Newton's cradle: outer dots swing out and strike back. | 6 wide | `role="status"` wrapper + `td-sr` text |
+| `.td-revolution` | Two dots orbit a centre dot at different speeds. | 7 x 7 | `role="status"` wrapper + `td-sr` text; use at hero or empty-state size |
+| `.td-windmill` | A triangle of dots turns in eased 120-degree steps. | 3 x 3 | `role="status"` wrapper + `td-sr` text |
 
 When a loader sits beside visible text ("Saving", "Syncing your notes"), the words carry the meaning.
 Mark the loader `aria-hidden="true"` and put `aria-busy="true"` on the control or region that is
 updating. Use `role="status"` only for a loader that stands alone.
+
+The `td-sr` text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the loader first, then the text.
 
 ---
 
@@ -38,8 +42,10 @@ updating. Use `role="status"` only for a loader that stands alone.
 ```html
 <link rel="stylesheet" href="three-dots.css">
 
-<div class="td-pulse" role="status" aria-label="Loading"
-     style="color: #6d28d9; --td-size: 10px"></div>
+<div role="status">
+  <div class="td-pulse" style="color: #6d28d9; --td-size: 10px"></div>
+  <span class="td-sr">Loading…</span>
+</div>
 
 <!-- decorative, beside visible text -->
 <span class="td-flashing" aria-hidden="true" style="--td-size: 3px"></span> Saving

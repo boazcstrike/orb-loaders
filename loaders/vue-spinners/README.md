@@ -55,10 +55,15 @@ With the script:
 With the CSS alone:
 
 ```html
-<span class="vs-ring" style="--vs-size: 64px" role="status" aria-label="Loading"></span>
-<span class="vs-pulse" role="status" aria-label="Loading"><i></i><i></i><i></i></span>
-<span class="vs-grid" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+<span role="status"><span class="vs-ring" style="--vs-size: 64px"></span><span class="vs-sr">Loading…</span></span>
+<span role="status"><span class="vs-pulse"><i></i><i></i><i></i></span><span class="vs-sr">Loading…</span></span>
+<span role="status"><span class="vs-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="vs-sr">Loading…</span></span>
 ```
+
+The `vs-sr` text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the spinner first, then the text. `VueSpinners.mount` does this for you: the
+spinner is the `role="status"` element, and it adds the `vs-sr` text one frame after inserting it.
 
 `clip`, `ring`, `moon`, `dot` and `bounce` are one empty `span`. `pulse` and `sync` need three `<i>`, `grid` needs
 nine.
@@ -70,7 +75,7 @@ nine.
 | `variant` | `'clip'` | One of `clip`, `ring`, `moon`, `dot`, `bounce`, `pulse`, `sync`, `grid`. An unknown name throws a `RangeError` listing the valid ones. |
 | `size` | `48` | Pixels, sets `--vs-size`. For the round spinners it is the diameter; for `pulse`, `sync` and `grid` it is the overall width. |
 | `color` | inherited | Any CSS colour. Default is the surrounding text colour (`currentColor`). |
-| `label` | `'Loading'` | The accessible name. |
+| `label` | `'Loading'` | The accessible text, added as a visually-hidden span one frame after the spinner is inserted. |
 
 ### Behaviour
 
@@ -80,7 +85,7 @@ nine.
 - **Reduced motion.** Under `prefers-reduced-motion: reduce` nothing travels. Each spinner holds one frame and
   breathes slowly in opacity. The duration is `!important`, so a page rule that shortens every animation to
   about 0 ms (as `assets/glass.css` does) cannot make it strobe.
-- **Accessible.** `role="status"` with an `aria-label`.
+- **Accessible.** `role="status"` with visually-hidden text (`vs-sr`) instead of an `aria-label` on an empty node.
 - **Zero network requests.**
 
 ---

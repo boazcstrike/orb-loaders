@@ -53,6 +53,7 @@
     display:flex; align-items:center; justify-content:center;
     min-height:150px; padding:16px;
   }
+  .variant .stage > [role="status"], .ladder .slot > [role="status"], .cl-slot > [role="status"]{display:flex}
   .variant .meta{padding:13px 8px 7px}
   .variant .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
   .variant .name code{font-size:11.5px; color:var(--accent-ink); font-weight:600; margin-left:4px}
@@ -175,29 +176,29 @@
       <div class="card glass">
         <h3>Inside a button</h3>
         <button class="btn busy" type="button" aria-busy="true">
-          <span class="cl-arc" style="--cl-size:16px;color:#fff" role="status" aria-label="Saving"></span>
+          <span class="cl-arc" style="--cl-size:16px;color:#fff" aria-hidden="true"></span>
           Saving&hellip;
         </button>
         <button class="btn ghost busy" type="button" aria-busy="true">
-          <span class="cl-segments" style="--cl-size:16px" role="status" aria-label="Uploading"></span>
+          <span class="cl-segments" style="--cl-size:16px" aria-hidden="true"></span>
           Uploading&hellip;
         </button>
       </div>
       <div class="card glass">
         <h3>Beside text</h3>
-        <div class="row stage-color">
-          <span class="cl-sweep" style="--cl-size:20px" role="status" aria-label="Checking"></span>
+        <div class="row stage-color" role="status">
+          <span class="cl-sweep" style="--cl-size:20px" aria-hidden="true"></span>
           <span style="color:var(--muted)">Checking your address&hellip;</span>
         </div>
-        <div class="row stage-color">
-          <span class="cl-pulse" style="--cl-size:20px" role="status" aria-label="Connecting"></span>
+        <div class="row stage-color" role="status">
+          <span class="cl-pulse" style="--cl-size:20px" aria-hidden="true"></span>
           <span style="color:var(--muted)">Connecting to the server&hellip;</span>
         </div>
       </div>
       <div class="card glass">
         <h3>Whole panel</h3>
-        <div class="hero stage-color">
-          <span class="cl-orbit" style="--cl-size:96px" role="status" aria-label="Loading your files"></span>
+        <div class="hero stage-color" role="status">
+          <span class="cl-orbit" style="--cl-size:96px" aria-hidden="true"></span>
           <p>Loading your files&hellip;</p>
         </div>
       </div>
@@ -226,19 +227,26 @@
 <pre id="snippet"><span class="c">&lt;!-- load it --&gt;</span>
 &lt;link rel="stylesheet" href="css-loaders.css"&gt;
 
-<span class="c">&lt;!-- use it: one element, announced as a status --&gt;</span>
-&lt;span class="cl-arc" role="status" aria-label="Loading"&gt;&lt;/span&gt;
+<span class="c">&lt;!-- use it: announced as a status through visually-hidden text --&gt;</span>
+&lt;span role="status"&gt;
+  &lt;span class="cl-arc"&gt;&lt;/span&gt;
+  &lt;span class="cl-sr"&gt;Loading…&lt;/span&gt;
+&lt;/span&gt;
 
 <span class="c">&lt;!-- size and colour --&gt;</span>
-&lt;span class="cl-orbit" style="--cl-size: 96px; color: #0f766e"
-      role="status" aria-label="Loading"&gt;&lt;/span&gt;
+&lt;span role="status"&gt;
+  &lt;span class="cl-orbit" style="--cl-size: 96px; color: #0f766e"&gt;&lt;/span&gt;
+  &lt;span class="cl-sr"&gt;Loading…&lt;/span&gt;
+&lt;/span&gt;
 
 <span class="c">&lt;!-- freeze it while offscreen (optional) --&gt;</span>
 el.classList.add('cl-paused');</pre>
       <ul class="notes">
         <li><strong>Cost:</strong> about 11&nbsp;KB raw including the licence header. Every animation runs on
             <code>transform</code> and <code>opacity</code> (the arc draw animates a mask angle). No requests.</li>
-        <li><strong>Accessibility:</strong> give each loader <code>role="status"</code> and an <code>aria-label</code>.
+        <li><strong>Accessibility:</strong> wrap each loader in <code>role="status"</code> with a visually-hidden <code>cl-sr</code> span. Keep a persistent
+            status region on the page, or set <code>aria-busy="true"</code> on the region being loaded, and insert the
+            loader before the text.
             Under <code>prefers-reduced-motion</code> nothing travels; the loader holds still and breathes in opacity.</li>
         <li><strong>Browsers:</strong> modern evergreen. Without <code>@property</code> the sweep loader steps instead of
             drawing smoothly; without <code>color-mix</code> the tracks fall back to neutral grey.</li>
@@ -277,7 +285,8 @@ el.classList.add('cl-paused');</pre>
   var state = { ink: 'accent', size: 64, ladder: 'cl-sweep' };
 
   function loaderHtml(cls, size, label) {
-    return '<span class="' + cls + '" style="--cl-size:' + size + 'px" role="status" aria-label="' + label + '"></span>';
+    return '<span role="status"><span class="' + cls + '" style="--cl-size:' + size + 'px"></span>' +
+           '<span class="cl-sr">' + label + '…</span></span>';
   }
 
   /* ---- the eight ---- */

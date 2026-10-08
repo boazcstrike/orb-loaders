@@ -34,11 +34,20 @@ and dark themes, in-context examples, and a copyable snippet.
 ```html
 <link rel="stylesheet" href="css-loaders.css">
 
-<span class="cl-arc" role="status" aria-label="Loading"></span>
+<span role="status">
+  <span class="cl-arc"></span>
+  <span class="cl-sr">Loading…</span>
+</span>
 
-<span class="cl-orbit" style="--cl-size: 96px; color: #0f766e"
-      role="status" aria-label="Loading"></span>
+<span role="status">
+  <span class="cl-orbit" style="--cl-size: 96px; color: #0f766e"></span>
+  <span class="cl-sr">Loading…</span>
+</span>
 ```
+
+The `cl-sr` text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the loader first, then the text.
 
 ### Options
 
@@ -55,7 +64,7 @@ and dark themes, in-context examples, and a copyable snippet.
 - **Reduced motion.** Under `prefers-reduced-motion: reduce` nothing travels. Each loader holds one frame and
   breathes slowly in opacity. The duration is `!important`, so a page rule that shortens every animation to
   about 0 ms (as `assets/glass.css` does) cannot make it strobe.
-- **Accessible.** Put `role="status"` and an `aria-label` on each loader. The animation itself is decorative.
+- **Accessible.** Wrap each loader in `role="status"` with a visually-hidden `cl-sr` span. The animation itself is decorative.
 - **Zero network requests.**
 - **Browsers.** Modern evergreen. Without `@property`, `cl-sweep` steps instead of drawing smoothly. Without
   `color-mix`, tracks fall back to neutral grey.

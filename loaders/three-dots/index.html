@@ -54,6 +54,7 @@
     display:flex; align-items:center; justify-content:center;
     min-height:120px; padding:16px; --td-size:12px;
   }
+  .stage > [role="status"], .bubble > [role="status"]{display:flex}
   .meta{padding:13px 8px 7px; display:flex; flex-direction:column; flex:1}
   .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
   .name em{font-style:normal; color:var(--accent-ink); font-weight:600; font-size:11px}
@@ -151,82 +152,82 @@
     <div class="grid">
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-flashing" role="status" aria-label="Loading"></div></div>
+        <div class="stage well"><div role="status"><div class="td-flashing"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">flashing <em>&middot; .td-flashing</em></div>
           <div class="desc">Three dots fade up in a left-to-right wave. The calmest of the set.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label for a page or panel wait.</div>
-          <div class="copyrow"><code>&lt;div class="td-flashing" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text for a page or panel wait.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-flashing"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-pulse" role="status" aria-label="Loading"></div></div>
+        <div class="stage well"><div role="status"><div class="td-pulse"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">pulse <em>&middot; .td-pulse</em></div>
           <div class="desc">Dots swell and settle in turn. Never shrinks to nothing, so it reads at a glance.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label; the default general-purpose pick.</div>
-          <div class="copyrow"><code>&lt;div class="td-pulse" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text; the default general-purpose pick.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-pulse"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-elastic" role="status" aria-label="Loading"></div></div>
+        <div class="stage well"><div role="status"><div class="td-elastic"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">elastic <em>&middot; .td-elastic</em></div>
           <div class="desc">A vertical stretch rolls across the row, like a wave through rubber.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label.</div>
-          <div class="copyrow"><code>&lt;div class="td-elastic" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-elastic"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-typing" role="status" aria-label="Replying"></div></div>
+        <div class="stage well"><div role="status"><div class="td-typing"></div><span class="td-sr">Replying…</span></div></div>
         <div class="meta">
           <div class="name">typing <em>&middot; .td-typing</em></div>
           <div class="desc">Each dot hops and brightens in turn. The chat "someone is typing" idiom.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + a specific label, e.g. "Assistant is replying".</div>
-          <div class="copyrow"><code>&lt;div class="td-typing" role="status" aria-label="Replying"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + specific visually-hidden text, e.g. "Assistant is replying".</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-typing"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Replying…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-falling" role="status" aria-label="Loading"></div></div>
+        <div class="stage well"><div role="status"><div class="td-falling"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">falling <em>&middot; .td-falling</em></div>
           <div class="desc">Dots drop in, hold, then fall away. Slows in, speeds out, like gravity.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label.</div>
-          <div class="copyrow"><code>&lt;div class="td-falling" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-falling"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-collision" role="status" aria-label="Loading"></div></div>
+        <div class="stage well"><div role="status"><div class="td-collision"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">collision <em>&middot; .td-collision</em></div>
           <div class="desc">Newton's cradle: outer dots swing out and strike back, one side then the other.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label. Wider footprint (6 dots).</div>
-          <div class="copyrow"><code>&lt;div class="td-collision" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. Wider footprint (6 dots).</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-collision"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-revolution" role="status" aria-label="Loading" style="--td-size:7px"></div></div>
+        <div class="stage well"><div role="status"><div class="td-revolution" style="--td-size:7px"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">revolution <em>&middot; .td-revolution</em></div>
           <div class="desc">Two dots orbit a centre dot at different speeds. Big footprint: shown at 7px.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label; hero or empty-state use.</div>
-          <div class="copyrow"><code>&lt;div class="td-revolution" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text; hero or empty-state use.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-revolution"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="td-windmill" role="status" aria-label="Loading" style="--td-size:14px"></div></div>
+        <div class="stage well"><div role="status"><div class="td-windmill" style="--td-size:14px"></div><span class="td-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">windmill <em>&middot; .td-windmill</em></div>
           <div class="desc">A triangle of dots turns in eased 120&deg; steps, clicking from one pose to the next.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label.</div>
-          <div class="copyrow"><code>&lt;div class="td-windmill" role="status" aria-label="Loading"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text.</div>
+          <div class="copyrow"><code>&lt;div role="status"&gt;&lt;div class="td-windmill"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
@@ -296,7 +297,7 @@
         <div class="btnrow">
           <button class="btn" type="button" disabled aria-busy="true"><span>Saving</span> <span class="inline td-pulse" style="--td-size:3px" aria-hidden="true"></span></button>
         </div>
-        <div class="bubble"><span class="inline td-typing" role="status" aria-label="Assistant is replying"></span></div>
+        <div class="bubble"><span role="status"><span class="inline td-typing"></span><span class="td-sr">Assistant is replying</span></span></div>
       </div>
     </div>
   </section>
@@ -309,13 +310,18 @@
 &lt;link rel="stylesheet" href="three-dots.css"&gt;
 
 <span class="c">&lt;!-- 2. one element; colour and size are ordinary CSS --&gt;</span>
-&lt;div class="td-pulse" role="status" aria-label="Loading"
-     style="color: var(--accent); --td-size: 10px"&gt;&lt;/div&gt;
+&lt;div role="status"&gt;
+  &lt;div class="td-pulse" style="color: var(--accent); --td-size: 10px"&gt;&lt;/div&gt;
+  &lt;span class="td-sr"&gt;Loading…&lt;/span&gt;
+&lt;/div&gt;
 
 <span class="c">&lt;!-- decorative, beside visible text --&gt;</span>
 &lt;span class="td-flashing" aria-hidden="true" style="--td-size: 3px"&gt;&lt;/span&gt; Saving</pre>
-      <div class="copyrow" style="margin-top:12px"><code>&lt;div class="td-pulse" role="status" aria-label="Loading" style="--td-size: 10px"&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+      <div class="copyrow" style="margin-top:12px"><code>&lt;div role="status"&gt;&lt;div class="td-pulse" style="--td-size: 10px"&gt;&lt;/div&gt;&lt;span class="td-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
       <ul class="notes">
+        <li><strong>Announcing:</strong> the <code>td-sr</code> text is visually hidden but read aloud. Keep a persistent
+            <code>role="status"</code> region on the page, or set <code>aria-busy="true"</code> on the region being loaded;
+            insert the loader first, then the text.</li>
         <li><strong>Reduced motion:</strong> the dots hold their rest pose and the whole loader breathes in opacity, slowly. Turn it on in your OS to see it.</li>
         <li><strong>Cost:</strong> 12&nbsp;KB of CSS as authored (3.5&nbsp;KB gzipped), about 2&nbsp;KB of it the licence header. No images, fonts or requests.</li>
         <li><strong>Licence:</strong> MIT, Zongbin. The notice is in the file header; keep it.</li>

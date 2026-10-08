@@ -727,7 +727,7 @@
       paint(ctx, size, fr, opts.rMin, ink, isDark);
     }
 
-    var raf = 0, running = false, paused = false;
+    var raf = 0, running = false, paused = false, destroyed = false;
     function frame() {
       draw(performance.now() / 1000 * speed);
       if (running) raf = requestAnimationFrame(frame);
@@ -742,7 +742,11 @@
     if (still) {
       draw(rest);
       return {
-        destroy: function () { if (canvas.parentNode) canvas.parentNode.removeChild(canvas); },
+        destroy: function () {
+          if (destroyed) return;
+          destroyed = true;
+          if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+        },
         setPaused: function () {}
       };
     }
@@ -764,12 +768,19 @@
 
     return {
       destroy: function () {
+        if (destroyed) return;
+        destroyed = true;
         stop();
         if (io) io.disconnect();
         document.removeEventListener('visibilitychange', onVis);
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
       },
-      setPaused: function (p) { paused = p; if (p) stop(); else start(); }
+      setPaused: function (p) {
+        if (destroyed) return;
+        paused = p;
+        if (p) stop();
+        else if (visible && document.visibilityState !== 'hidden') start();
+      }
     };
   }
 

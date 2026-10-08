@@ -72,7 +72,24 @@
  * Size  : --vs-size (any length, default 48px). Orbs: the diameter. Dot rows and
  *         the grid: the overall width.
  * Colour: `color` on the element or any ancestor.
+ * Announce: wrap the spinner in a role="status" element with a visually-hidden label:
+ *   <span role="status"><span class="vs-ring"></span><span class="vs-sr">Loading…</span></span>
+ *   (vue-spinners.js makes the spinner itself the status element and adds the
+ *   .vs-sr span inside it.)
  */
+
+/* Visually-hidden text for the role="status" element: read by screen readers, never seen. */
+.vs-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .vs-clip, .vs-ring, .vs-moon, .vs-dot, .vs-bounce,
 .vs-pulse, .vs-sync, .vs-grid {

@@ -17,12 +17,26 @@
  * curves chosen per spinner; prefers-reduced-motion swaps the motion for a slow
  * opacity pulse. See README.md "Changes from upstream".
  *
- * Usage:   <div class="cs-ring" role="status" aria-label="Loading">
- *            <div></div><div></div><div></div><div></div>
+ * Usage:   <div role="status">
+ *            <div class="cs-ring"><div></div><div></div><div></div><div></div></div>
+ *            <span class="cs-sr">Loading…</span>
  *          </div>
  *          colour: set `color` on it or any ancestor.
  *          size:   style="--cs-size: 24px"   (default 80px)
  */
+
+/* Visually-hidden text for the role="status" wrapper: read by screen readers, never seen. */
+.cs-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ------------------------------------------------------------------ shared */
 

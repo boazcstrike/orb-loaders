@@ -232,7 +232,7 @@
       <ul class="notes">
         <li><strong>Cost:</strong> about 14&nbsp;KB as authored including the licence header; only <code>transform</code> and <code>opacity</code> animate. Zero requests.</li>
         <li><strong>Markup:</strong> the children can be any element (<code>div</code> or <code>span</code>), and the root is block-level, so inside inline text put it in a flex parent.</li>
-        <li><strong>Accessibility:</strong> put <code>role="status"</code> and an <code>aria-label</code> on the root when the indicator is the only signal; mark it <code>aria-hidden="true"</code> when text already says "Loading".</li>
+        <li><strong>Accessibility:</strong> wrap the indicator in <code>role="status"</code> with a visually-hidden <code>ai-sr</code> span ("Loading&hellip;") when it is the only signal; mark it <code>aria-hidden="true"</code> when text already says "Loading". Keep a persistent status region on the page, or set <code>aria-busy="true"</code> on the region being loaded, and insert the indicator before the text.</li>
         <li><strong>Reduced motion:</strong> <code>prefers-reduced-motion: reduce</code> swaps the motion for a static composition that breathes in opacity over 3&nbsp;s.</li>
         <li><strong>Licence:</strong> upstream is MIT. Attribution is in the file header.</li>
       </ul>
@@ -363,14 +363,16 @@
   function renderSnippet() {
     var v = find(state.pick);
     var parts = '';
-    for (var i = 0; i < v.n; i++) parts += '  <div></div>\n';
+    for (var i = 0; i < v.n; i++) parts += '    <div></div>\n';
     snippet.textContent =
       '<!-- 1. load the stylesheet -->\n' +
       '<link rel="stylesheet" href="activity-indicators.css">\n\n' +
       '<!-- 2. drop in the markup: ' + v.label + ' -->\n' +
-      '<div class="' + v.root + '" role="status" aria-label="Loading"\n' +
-      '     style="--ai-size: 48px; color: #6d28d9">\n' +
+      '<div role="status">\n' +
+      '  <div class="' + v.root + '" style="--ai-size: 48px; color: #6d28d9">\n' +
       parts +
+      '  </div>\n' +
+      '  <span class="ai-sr">Loading\u2026</span>\n' +
       '</div>';
   }
 

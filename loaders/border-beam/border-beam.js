@@ -56,6 +56,7 @@
   var DEFAULT_DURATION = { travel: 2.2, line: 3.1, breathe: 2.3, halo: 2.3 };
   var LAYERS = ['halo', 'glow', 'ring'];
   var MAX_FADE_PX = 28;
+  var STYLE_PROPS = ['--bb-dur', '--bb-r', '--bb-bw', '--bb-fade', '--bb-strength'];
   var STYLE_HINT_DONE = false;
 
   var mqDark = null;
@@ -105,7 +106,11 @@
       cls: host.classList.contains('bbeam'),
       attrs: ['data-bb-mode', 'data-bb-palette', 'data-bb-theme', 'data-bb-state', 'data-bb-hue', 'data-bb-paused']
         .map(function (a) { return [a, host.getAttribute(a)]; }),
-      style: host.getAttribute('style'),
+      // Only the custom properties this loader sets; the rest of the inline style belongs to the app.
+      props: STYLE_PROPS.map(function (n) {
+        return [n, host.style.getPropertyValue(n), host.style.getPropertyPriority(n)];
+      }),
+      hadStyle: host.hasAttribute('style'),
       busy: host.getAttribute('aria-busy')
     };
 
@@ -180,7 +185,10 @@
         prev.attrs.forEach(function (p) {
           if (p[1] == null) host.removeAttribute(p[0]); else host.setAttribute(p[0], p[1]);
         });
-        if (prev.style == null) host.removeAttribute('style'); else host.setAttribute('style', prev.style);
+        prev.props.forEach(function (p) {
+          if (p[1]) host.style.setProperty(p[0], p[1], p[2]); else host.style.removeProperty(p[0]);
+        });
+        if (!prev.hadStyle && !host.getAttribute('style')) host.removeAttribute('style');
         if (prev.busy == null) host.removeAttribute('aria-busy'); else host.setAttribute('aria-busy', prev.busy);
       },
       // Fades the glow in or out; the layers stay in place so it can resume.

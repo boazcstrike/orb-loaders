@@ -75,8 +75,9 @@ Returns `{ destroy() }`.
 
 ### Behaviour
 
-- **Pausable clock.** One timer, no animation-frame loop. The clock, the CSS loops and the SVG globes
-  all stop when the block is offscreen or the tab is hidden.
+- **Wall clock.** One timer, no animation-frame loop. The timeline keeps advancing when the block is
+  offscreen or the tab is hidden; the CSS loops and the SVG globes stop, and the current state is
+  rendered when the block is visible again.
 - **Globes exist only while loading.** Each row builds its globe when it starts loading and removes
   it after the fade out, so a finished list holds no running SVG animation.
 - **Accessible.** The caret is a real button with `aria-expanded`; a visually hidden
@@ -120,8 +121,9 @@ The full MIT notice is in the header of `web-search.js`. Keep it there.
   ones. Globes are built when a row starts loading, removed after it finishes, and paused offscreen.
 - **Shimmer is a mask.** One slow sweep that rests between passes (2.7 s), no colour needed, so it
   works on any background.
-- **Pausable timeline.** Upstream used chained `setTimeout`s that kept running offscreen and in
-  background tabs. The timeline now runs on a clock that pauses with visibility.
+- **One-timer timeline.** Upstream used chained `setTimeout`s that kept running offscreen and in
+  background tabs. The timeline now runs off one timer and a wall clock, and only the visuals
+  (loops, globes) pause with visibility.
 - **Reduced motion keeps the progress.** Upstream only removed the shimmer and entrance. Now the
   globe is still, the ping is gone and nothing loops, while pending / loading / done still change.
 - **Screen readers.** State announced once instead of silent; the toggle has `aria-expanded`;

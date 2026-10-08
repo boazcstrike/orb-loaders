@@ -34,12 +34,19 @@ ballClipRotateMultiple, ballScaleRipple, lineScalePulseOut, lineSpinFadeLoader, 
 ```html
 <link rel="stylesheet" href="activity-indicators.css">
 
-<div class="ai-ball-pulse" role="status" aria-label="Loading" style="--ai-size: 48px; color: #6d28d9">
-  <div></div>
-  <div></div>
-  <div></div>
+<div role="status">
+  <div class="ai-ball-pulse" style="--ai-size: 48px; color: #6d28d9">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <span class="ai-sr">Loading…</span>
 </div>
 ```
+
+The text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the spinner first, then the text.
 
 Children can be any element. Inside a `<button>` use `<span>` rather than `<div>`.
 

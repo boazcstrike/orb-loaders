@@ -1,8 +1,8 @@
 # References
 
 Loading-animation work that this repository draws on, studies, or points to. Each entry says whether
-it is **vendored** (code adapted into `loaders/`), or **reference only** (linked for study, no code
-copied).
+it is **vendored** (code adapted into `loaders/`), **reimplemented** (look rebuilt, no code copied),
+or **reference only** (linked for study, no code copied).
 
 Licences and author locations were checked against each project's GitHub repository and profile on
 2026-10-09. A location is stated only where the author's own profile states it.
@@ -21,7 +21,6 @@ Licences and author locations were checked against each project's GitHub reposit
 | [cssloaders](https://cssloaders.github.io/) · [repo](https://github.com/vineethtrv/css-loader) | Vineeth TR (Kerala, India) | MIT | [`loaders/css-loaders`](../loaders/css-loaders/) |
 | [vue-spinner](http://greyby.github.io/vue-spinner/) · [repo](https://github.com/greyby/vue-spinner) | greyby (Beijing), after [Halogen](https://github.com/yuanyan/halogen) by Yuanyan Cao | MIT | [`loaders/vue-spinners`](../loaders/vue-spinners/) |
 | [Ant Design X · Think](https://x.ant.design/components/think) · [repo](https://github.com/ant-design/x) | Ant Group | MIT | [`loaders/think-shimmer`](../loaders/think-shimmer/) |
-| [css-doodle](https://css-doodle.com) · [repo](https://github.com/css-doodle/css-doodle) | Yuan Chuan | MIT | [`loaders/doodle-orbs`](../loaders/doodle-orbs/) |
 | [sketch-threejs](https://ykob.github.io/sketch-threejs/) · [repo](https://github.com/ykob/sketch-threejs) | Yoichi Kobayashi (Tokyo) | MIT | [`loaders/particle-orbs`](../loaders/particle-orbs/) |
 | [voiceorbs](https://voiceorbs.vercel.app/) · [repo](https://github.com/amunozdev/voiceorbs) | Alexis Muñoz (Buenos Aires) | MIT | [`loaders/voice-orbs`](../loaders/voice-orbs/) |
 | [SpinKit](https://github.com/tobiasahlin/SpinKit) · [Android port](https://github.com/ybq/Android-SpinKit) | Tobias Ahlin · ybq (Beijing) | MIT | [`loaders/spinkit`](../loaders/spinkit/) |
@@ -29,6 +28,17 @@ Licences and author locations were checked against each project's GitHub reposit
 
 Every vendored loader states its upstream, its licence, and what changed in its own folder
 `README.md` under **Changes from upstream**.
+
+---
+
+## Reimplemented
+
+The look is rebuilt from scratch. No upstream code is copied, but the idea is theirs, so the file
+header still credits the author and carries the MIT notice.
+
+| Reference | Author | Licence | In this repo |
+| --- | --- | --- | --- |
+| [css-doodle](https://css-doodle.com) · [repo](https://github.com/css-doodle/css-doodle) | Yuan Chuan | MIT | [`loaders/doodle-orbs`](../loaders/doodle-orbs/) |
 
 ---
 

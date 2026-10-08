@@ -231,19 +231,19 @@ const spinner = VueSpinners.mount(document.getElementById('loader'), {
   variant: 'ring',   <span class="c">// clip | ring | moon | dot | bounce | pulse | sync | grid</span>
   size: 64,          <span class="c">// pixels</span>
   color: '#0f766e',  <span class="c">// optional; default is the surrounding text colour</span>
-  label: 'Loading'   <span class="c">// accessible name</span>
+  label: 'Loading'   <span class="c">// accessible text, visually hidden</span>
 });
 spinner.destroy();
 
 <span class="c">&lt;!-- or, with the CSS alone --&gt;</span>
-&lt;span class="vs-ring" style="--vs-size: 64px" role="status" aria-label="Loading"&gt;&lt;/span&gt;
-&lt;span class="vs-pulse" role="status" aria-label="Loading"&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;/span&gt;</pre>
+&lt;span role="status"&gt;&lt;span class="vs-ring" style="--vs-size: 64px"&gt;&lt;/span&gt;&lt;span class="vs-sr"&gt;Loading…&lt;/span&gt;&lt;/span&gt;
+&lt;span role="status"&gt;&lt;span class="vs-pulse"&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;/span&gt;&lt;span class="vs-sr"&gt;Loading…&lt;/span&gt;&lt;/span&gt;</pre>
       <ul class="notes">
         <li><strong>Cost:</strong> the stylesheet is about 13&nbsp;KB raw, most of it the two licence notices; the
             script is about 3&nbsp;KB. No requests, no animation frames: everything is CSS keyframes on
             <code>transform</code> and <code>opacity</code>.</li>
         <li><strong>Frames:</strong> the script adds <code>vs-paused</code> while a spinner is scrolled offscreen or the tab is hidden.</li>
-        <li><strong>Accessibility:</strong> <code>role="status"</code> with an <code>aria-label</code>. Under
+        <li><strong>Accessibility:</strong> <code>role="status"</code> with visually-hidden text (<code>vs-sr</code>), added a frame after insert so it is announced. Under
             <code>prefers-reduced-motion</code> nothing travels; the spinner holds still and breathes in opacity.</li>
         <li><strong>Licence:</strong> upstream is MIT, and so is Halogen, which it is based on. Both notices are in the stylesheet header.</li>
       </ul>

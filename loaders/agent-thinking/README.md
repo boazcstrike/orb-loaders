@@ -68,20 +68,21 @@ light and dark with no option.
 | `loop` | `false` | Replay after a rest. |
 | `reserveSpace` | `true` | Keep the block's full height while collapsed, so content below does not jump. Turn off for inline use. |
 | `label` | `'Reasoning'` | Accessible name of the scrollable stream. |
-| `onComplete` | none | Called once per run, when reasoning ends. |
+| `onComplete` | none | Called once per run, when reasoning ends. Also fires under `prefers-reduced-motion` (just after `mount` returns) and in a background tab. |
 
 Returns `{ destroy() }`.
 
 ### Behaviour
 
-- **Pausable clock.** One timer, no animation-frame loop. It wakes only when a line or a whole second
-  is due, and stops when the block is scrolled offscreen or the tab is hidden, so elapsed time never
-  counts a wait nobody saw.
+- **Wall clock.** One timer, no animation-frame loop. It wakes only when a line or a whole second
+  is due and keeps running when the block is scrolled offscreen or the tab is hidden, so the lines,
+  the elapsed time and `onComplete` stay on schedule. Only the shimmer pauses; the current state is
+  rendered when the block is visible again.
 - **Accessible.** The header is a real button with `aria-expanded`. A visually hidden
   `role="status"` announces "Thinking" and "Finished thinking" only; the ticking timer is
   `aria-hidden`. Collapsed content is `inert`.
 - **Reduced motion.** Renders the finished reasoning at once: no shimmer, slide, fade or collapse
-  animation.
+  animation. `onComplete` still fires, on the next tick after `mount` returns.
 
 ---
 
@@ -114,8 +115,9 @@ The full MIT notice is in the header of `agent-thinking.js`. Keep it there.
   opacity change; the shimmer is one slow sweep that rests between passes (2.4 s), implemented as a
   mask so it needs no colour.
 - **Drift-free tabular timer.** Upstream counted `setInterval` ticks, which drift and keep counting in
-  a background tab. The timer is read from a clock that pauses offscreen and when the tab is hidden,
-  and uses tabular numerals so the header does not jitter each second.
+  a background tab. The timer is read from a wall clock that keeps advancing offscreen and when the
+  tab is hidden (only the shimmer pauses), and uses tabular numerals so the header does not jitter
+  each second.
 - **Size is one option.** Upstream was fixed at 13 px / 360 px. `size` scales line height, clamp,
   viewport cap and fade together, so it works from 11 px in a side panel to 20 px as a hero.
 - **Reduced motion shows the result.** Upstream skipped straight to done but still animated its

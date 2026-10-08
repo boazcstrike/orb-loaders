@@ -54,6 +54,7 @@
     display:flex; align-items:center; justify-content:center;
     min-height:150px; padding:16px; --cs-size:64px;
   }
+  .stage > [role="status"]{display:flex}
   .meta{padding:13px 8px 7px; display:flex; flex-direction:column; flex:1}
   .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
   .name em{font-style:normal; color:var(--accent-ink); font-weight:600; font-size:11px}
@@ -150,22 +151,22 @@
     <div class="grid">
 
       <article class="variant glass">
-        <div class="stage well"><div class="cs-spinner" role="status" aria-label="Loading"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="stage well"><div role="status"><div class="cs-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">spinner <em>&middot; .cs-spinner</em></div>
           <div class="desc">Twelve bars with a bright head and a fading tail. The familiar system spinner.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label for a page or panel wait. 12 children.</div>
-          <div class="copyrow"><code>&lt;div class=&quot;cs-spinner&quot; role=&quot;status&quot; aria-label=&quot;Loading&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text for a page or panel wait. 12 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-spinner&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="cs-default" role="status" aria-label="Loading"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="stage well"><div role="status"><div class="cs-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">default <em>&middot; .cs-default</em></div>
           <div class="desc">Twelve dots on a circle; a swell of size and brightness travels round.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label. 12 children.</div>
-          <div class="copyrow"><code>&lt;div class=&quot;cs-default&quot; role=&quot;status&quot; aria-label=&quot;Loading&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 12 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-default&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
@@ -180,12 +181,12 @@
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="cs-roller" role="status" aria-label="Loading"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="stage well"><div role="status"><div class="cs-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">roller <em>&middot; .cs-roller</em></div>
           <div class="desc">A fan of eight dots winds up and releases, each a beat behind the last.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label. 8 children.</div>
-          <div class="copyrow"><code>&lt;div class=&quot;cs-roller&quot; role=&quot;status&quot; aria-label=&quot;Loading&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 8 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-roller&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
@@ -210,22 +211,22 @@
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="cs-ellipsis" role="status" aria-label="Sending"><div></div><div></div><div></div><div></div></div></div>
+        <div class="stage well"><div role="status"><div class="cs-ellipsis"><div></div><div></div><div></div><div></div></div><span class="cs-sr">Sending…</span></div></div>
         <div class="meta">
           <div class="name">ellipsis <em>&middot; .cs-ellipsis</em></div>
           <div class="desc">Dots shuffle left while a new one grows in. Suits a short send or save.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + a verb label. 4 children.</div>
-          <div class="copyrow"><code>&lt;div class=&quot;cs-ellipsis&quot; role=&quot;status&quot; aria-label=&quot;Sending&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden verb text. 4 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-ellipsis&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Sending…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
       <article class="variant glass">
-        <div class="stage well"><div class="cs-grid" role="status" aria-label="Loading"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="stage well"><div role="status"><div class="cs-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
         <div class="meta">
           <div class="name">grid <em>&middot; .cs-grid</em></div>
           <div class="desc">Nine dots dim and shrink in a diagonal wave.</div>
-          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + label. 9 children.</div>
-          <div class="copyrow"><code>&lt;div class=&quot;cs-grid&quot; role=&quot;status&quot; aria-label=&quot;Loading&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 9 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-grid&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
         </div>
       </article>
 
@@ -261,8 +262,8 @@
       <div class="ctx">
         <div class="line"><span class="inline cs-spinner" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></span><span>Syncing your notes</span></div>
         <button class="btn" type="button" disabled aria-busy="true"><span class="inline cs-ring" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div></span><span>Saving</span></button>
-        <div class="panel">
-          <span class="inline cs-ripple" style="--cs-size:40px" role="status" aria-label="Searching nearby"><div></div><div></div></span>
+        <div class="panel" role="status">
+          <span class="inline cs-ripple" style="--cs-size:40px" aria-hidden="true"><div></div><div></div></span>
           <span>Searching nearby<small>This can take a few seconds</small></span>
         </div>
       </div>
@@ -277,15 +278,20 @@
 &lt;link rel="stylesheet" href="css-spinners.css"&gt;
 
 <span class="c">&lt;!-- 2. markup: one root, its children are the spinner parts --&gt;</span>
-&lt;div class="cs-ring" role="status" aria-label="Loading"
-     style="color: var(--accent); --cs-size: 32px"&gt;
-  &lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;
+&lt;div role="status"&gt;
+  &lt;div class="cs-ring" style="color: var(--accent); --cs-size: 32px"&gt;
+    &lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;span class="cs-sr"&gt;Loading…&lt;/span&gt;
 &lt;/div&gt;
 
 <span class="c">&lt;!-- decorative, beside visible text --&gt;</span>
 &lt;span class="cs-ring" aria-hidden="true" style="--cs-size: 16px"&gt;...&lt;/span&gt; Saving</pre>
-      <div class="copyrow" style="margin-top:12px"><code>&lt;div class="cs-ring" role="status" aria-label="Loading" style="--cs-size: 32px"&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+      <div class="copyrow" style="margin-top:12px"><code>&lt;div role="status"&gt;&lt;div class="cs-ring" style="--cs-size: 32px"&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="cs-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
       <ul class="notes">
+        <li><strong>Announcing:</strong> the <code>cs-sr</code> text is visually hidden but read aloud. Keep a persistent
+            <code>role="status"</code> region on the page, or set <code>aria-busy="true"</code> on the region being loaded;
+            insert the spinner first, then the text.</li>
         <li><strong>Child counts matter:</strong> each spinner needs exactly the number of empty <code>&lt;div&gt;</code>s listed on its card.</li>
         <li><strong>Reduced motion:</strong> children stop, the spinner holds a rest pose and breathes in opacity, slowly. Turn it on in your OS to see it.</li>
         <li><strong>Licence:</strong> the loader files are CC0 (public domain). A link back to <a href="https://loading.io/css/">loading.io/css</a> is appreciated, and it is in the file header.</li>

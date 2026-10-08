@@ -582,10 +582,13 @@
       cropX: 0, cropY: 0, cropW: 1, cropH: 1,
       canvas: null, ctx: null, css: null, io: null, ro: null,
       paths: null, perim: null, group: null, glow: newGlow(),
-      prevPosition: host.style.position, prevBusy: host.getAttribute('aria-busy'),
+      prevPosition: host.style.position, setPosition: null, prevBusy: host.getAttribute('aria-busy'),
       busy: o.busy !== false, destroyed: false, ready: false
     };
-    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    if (getComputedStyle(host).position === 'static') {
+      host.style.position = 'relative';
+      inst.setPosition = host.style.position;
+    }
     if (inst.busy) host.setAttribute('aria-busy', 'true');
 
     inst.canvas = document.createElement('canvas');
@@ -676,7 +679,10 @@
     instances.splice(instances.indexOf(inst), 1);
     if (inst.canvas.parentNode) inst.canvas.parentNode.removeChild(inst.canvas);
     if (inst.css && inst.css.parentNode) inst.css.parentNode.removeChild(inst.css);
-    inst.host.style.position = inst.prevPosition;
+    // Restore only if this loader set the position and the app has not changed it since.
+    if (inst.setPosition != null && inst.host.style.position === inst.setPosition) {
+      inst.host.style.position = inst.prevPosition;
+    }
     if (inst.busy) {
       if (inst.prevBusy == null) inst.host.removeAttribute('aria-busy');
       else inst.host.setAttribute('aria-busy', inst.prevBusy);

@@ -20,18 +20,22 @@ Each root needs exactly the number of empty child `<div>`s shown.
 
 | Class | Children | Animation | Accessibility pattern |
 | --- | --- | --- | --- |
-| `.cs-spinner` | 12 | Twelve bars, a bright head and a fading tail. | `role="status"` + `aria-label="Loading"` for a page or panel wait |
-| `.cs-default` | 12 | Twelve dots on a circle; a swell of size and brightness travels round. | `role="status"` + `aria-label="Loading"` |
+| `.cs-spinner` | 12 | Twelve bars, a bright head and a fading tail. | `role="status"` wrapper + `<span class="cs-sr">Loading…</span>` for a page or panel wait |
+| `.cs-default` | 12 | Twelve dots on a circle; a swell of size and brightness travels round. | `role="status"` wrapper + `cs-sr` text |
 | `.cs-ring` | 4 | Four arcs chase each other round one circle. | `aria-hidden="true"` inside a button that keeps visible text and `aria-busy="true"` |
-| `.cs-roller` | 8 | A fan of eight dots winds up and releases, each a beat behind. | `role="status"` + `aria-label="Loading"` |
+| `.cs-roller` | 8 | A fan of eight dots winds up and releases, each a beat behind. | `role="status"` wrapper + `cs-sr` text |
 | `.cs-ripple` | 2 | Two rings spread out and fade, like a sonar ping. | `role="img"` + a specific label, e.g. `aria-label="Searching nearby"` |
 | `.cs-facebook` | 3 | Three bars breathe in turn. | `role="progressbar"` + `aria-label="Loading"` with no `aria-valuenow` (indeterminate) |
-| `.cs-ellipsis` | 4 | Dots shuffle left while a new one grows in. | `role="status"` + a verb label, e.g. `aria-label="Sending"` |
-| `.cs-grid` | 9 | Nine dots dim and shrink in a diagonal wave. | `role="status"` + `aria-label="Loading"` |
+| `.cs-ellipsis` | 4 | Dots shuffle left while a new one grows in. | `role="status"` wrapper + `cs-sr` verb text, e.g. `Sending…` |
+| `.cs-grid` | 9 | Nine dots dim and shrink in a diagonal wave. | `role="status"` wrapper + `cs-sr` text |
 
 When a spinner sits beside visible text, the words carry the meaning. Mark the spinner
 `aria-hidden="true"` and put `aria-busy="true"` on the control or region that is updating. Use
 `role="status"` only for a spinner that stands alone.
+
+The `cs-sr` text is visually hidden but read aloud. A live region that is empty when it is inserted is often
+not announced, so keep a persistent `role="status"` region on the page, or set `aria-busy="true"` on the
+region being loaded; insert the spinner first, then the text.
 
 ---
 
@@ -40,9 +44,11 @@ When a spinner sits beside visible text, the words carry the meaning. Mark the s
 ```html
 <link rel="stylesheet" href="css-spinners.css">
 
-<div class="cs-ring" role="status" aria-label="Loading"
-     style="color: #6d28d9; --cs-size: 32px">
-  <div></div><div></div><div></div><div></div>
+<div role="status">
+  <div class="cs-ring" style="color: #6d28d9; --cs-size: 32px">
+    <div></div><div></div><div></div><div></div>
+  </div>
+  <span class="cs-sr">Loading…</span>
 </div>
 
 <!-- decorative, beside visible text -->

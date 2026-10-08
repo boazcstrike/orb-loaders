@@ -37,10 +37,28 @@
  * loader starts mid-motion, and a calm reduced-motion fallback. Each loader is
  * still one element.
  *
- * Usage:  <span class="cl-arc" role="status" aria-label="Loading"></span>
+ * Usage:  <span role="status">
+ *           <span class="cl-arc"></span>
+ *           <span class="cl-sr">Loading…</span>
+ *         </span>
  * Size :  style="--cl-size: 20px"  (any length; default 48px)
  * Colour: set `color` on the element or any ancestor; nothing else is hardcoded.
  */
+
+/* Visually-hidden text for the role="status" wrapper: read by screen readers, never seen. */
+.cl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
 
 .cl-arc, .cl-sweep, .cl-counter, .cl-twin,
 .cl-orbit, .cl-ripple, .cl-segments, .cl-pulse {

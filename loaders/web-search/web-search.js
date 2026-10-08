@@ -33,8 +33,8 @@
  * SOFTWARE.
  *
  * Adapted for orb-loaders: Solid + CSS module removed; plain DOM and scoped `wsr-` CSS.
- * Globes are built only while a row is loading (and paused offscreen), the clock is
- * pausable, rows only link when given an href, the header reports "Searched N sources" on
+ * Globes are built only while a row is loading (and paused offscreen), the clock keeps
+ * running while hidden (only the visuals pause), rows only link when given an href, the header reports "Searched N sources" on
  * completion, a radar ping leaves the active globe, sizing is one `size` option,
  * reduced motion keeps the progress but drops every movement. See README.md
  * "Changes from upstream".
@@ -174,7 +174,7 @@
     collapsible.appendChild(inner);
 
     var live = el('span', 'wsr-sr');
-    live.setAttribute('role', 'status');
+    live.setAttribute('role', 'status');   // inserted empty: first text lands on a later tick so SRs announce it
 
     var rows = sites.map(function (site, i) {
       var item = el('li', 'wsr-site');
@@ -265,7 +265,7 @@
       setHeadline();
     }
 
-    /* ---- timeline on a pausable clock ---- */
+    /* ---- timeline on the wall clock: keeps advancing while hidden / offscreen ---- */
     var events = [];
     sites.forEach(function (site, i) {
       events.push({ t: site.discover, run: function () { setSite(i, 'loading'); } });
@@ -278,12 +278,11 @@
       .sort(function (a, b) { return a.t - b.t || a.order - b.order; });
 
     var cursor = 0;
-    var elapsed = 0;
     var startedAt = 0;
     var running = false;
     var timer = 0;
 
-    function readClock() { return running ? elapsed + (performance.now() - startedAt) : elapsed; }
+    function readClock() { return performance.now() - startedAt; }
 
     function schedule() {
       clearTimeout(timer);
@@ -300,7 +299,6 @@
 
     function restart() {
       cursor = 0;
-      elapsed = 0;
       startedAt = performance.now();
       reset();
     }
@@ -312,15 +310,8 @@
         if (!r.globe || !r.globe.pauseAnimations) return;
         if (paused) r.globe.pauseAnimations(); else r.globe.unpauseAnimations();
       });
-      if (paused && running) {
-        elapsed = readClock();
-        running = false;
-        clearTimeout(timer);
-      } else if (!paused && !running && !destroyed) {
-        startedAt = performance.now();
-        running = true;
-        schedule();
-      }
+      // Only visuals pause; on return, catch the timeline up and render it.
+      if (!paused && running && !destroyed) tick();
     }
 
     var hidden = document.hidden;
@@ -344,7 +335,7 @@
     /* ---- start ---- */
     setOpen(open);
     setHeadline();
-    live.textContent = 'Searching';
+    setTimeout(function () { if (!destroyed) live.textContent = 'Searching'; }, 0);
     startedAt = performance.now();
     running = true;
     syncPaused();

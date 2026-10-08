@@ -66,6 +66,9 @@
     background:var(--bg); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line-strong);
   }
 
+  /* CSS-only previews have no JS loop to stop, so the page pauses them offscreen or in a hidden tab. */
+  .pv-paused, .pv-paused *{animation-play-state:paused !important}
+
   footer{
     margin-top:36px; font-size:12.5px; color:var(--muted);
     border-top:1px solid var(--line); padding-top:16px;
@@ -399,14 +402,55 @@
     }
   });
 
+  // CSS-only previews: pause while offscreen or when the tab is hidden.
+  var CSS_ONLY = ['three-dots', 'css-spinners', 'css-loaders', 'spinkit', 'activity-indicators'];
+  var cssHosts = [];
+  CSS_ONLY.forEach(function (id) {
+    var host = document.querySelector('[data-preview="' + id + '"]');
+    if (host) cssHosts.push({ host: host, onscreen: true });
+  });
+
+  function syncCssPaused() {
+    cssHosts.forEach(function (c) {
+      c.host.classList.toggle('pv-paused', document.visibilityState === 'hidden' || !c.onscreen);
+    });
+  }
+
+  if (window.IntersectionObserver) {
+    var cssIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        cssHosts.forEach(function (c) { if (c.host === e.target) c.onscreen = e.isIntersecting; });
+      });
+      syncCssPaused();
+    });
+    cssHosts.forEach(function (c) { cssIo.observe(c.host); });
+  }
+  document.addEventListener('visibilitychange', syncCssPaused);
+
+  // Leaving the page for good (not entering the back/forward cache): release every live handle.
+  // A persisted pagehide keeps the handles so a bfcache restore resumes as it was.
+  window.addEventListener('pagehide', function (event) {
+    if (event.persisted) return;
+    live.forEach(function (entry) {
+      try {
+        entry.handle.destroy();
+      } catch (err) {
+        console.error('Preview "' + entry.id + '" failed to destroy:', err);
+      }
+    });
+    live = [];
+  });
+
   window.addEventListener('themechange', function () {
     live = live.map(function (entry) {
       try {
         if (entry.spec.follow === 'set') {
           entry.handle.setTheme(theme());
         } else if (entry.spec.follow === 'remount') {
+          // Mount the new handle before destroying the old one, so a failed mount leaves the card showing its loader.
+          var next = entry.spec.mount(entry.host);
           entry.handle.destroy();
-          return { id: entry.id, host: entry.host, spec: entry.spec, handle: entry.spec.mount(entry.host) };
+          return { id: entry.id, host: entry.host, spec: entry.spec, handle: next };
         }
       } catch (err) {
         console.error('Preview "' + entry.id + '" failed to follow the theme:', err);
