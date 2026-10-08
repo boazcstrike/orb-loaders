@@ -1,0 +1,374 @@
+/*!
+ * border-beam.css — a travelling or breathing glow around an element's border,
+ * framed as a "busy" indicator. Pure CSS; border-beam.js only builds the layers.
+ *
+ * Ported from "Border Beam" in solid-thinking-orbs (SolidJS):
+ *   https://github.com/Mvkweb/solid-thinking-orbs
+ *   Live demo: https://solid-thinking-orbs.vercel.app
+ * Original design: Jakub Antalik (original Thinking Orbs concept and React
+ *   implementation) and Alex Brinza (https://x.com/a_brinza, creator).
+ * SolidJS port: Mvkweb.
+ *
+ * MIT License
+ *
+ * Copyright (c) 2026 Jakub Antalik (Original React Implementation)
+ * Copyright (c) 2026 Mvkweb (SolidJS Port)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Adapted for orb-loaders: upstream generates a fresh <style> block per
+ * instance and drives the breathing modes from a JS requestAnimationFrame loop
+ * that rewrites ~17 custom properties at 30 fps. Here one shared stylesheet
+ * covers every instance; travel and line are two registered-property
+ * animations, and breathe and halo animate the opacity and transform of small
+ * pre-painted gradient lobes, which the compositor runs without repainting.
+ * The blurred bloom layer is dropped (an animated blur repaints every frame).
+ * Colour palettes carry generic names. Reduced motion shows a static frame.
+ *
+ * Markup (border-beam.js builds this for you):
+ *   <div class="bbeam" data-bb-mode="travel" data-bb-palette="spectrum"
+ *        data-bb-theme="dark" data-bb-state="on">
+ *     ...your content...
+ *     <span class="bbeam-halo"><span class="bbeam-lobes"><i></i>x6</span></span>
+ *     <span class="bbeam-glow"><span class="bbeam-lobes"><i></i>x6</span></span>
+ *     <span class="bbeam-ring"><span class="bbeam-lobes"><i></i>x6</span></span>
+ *   </div>
+ * The host needs a border-radius. For halo, also set --bb-r to that radius.
+ */
+
+/* ============================================================ registered */
+
+@property --bb-angle { syntax: "<angle>";  inherits: true; initial-value: 0deg }
+@property --bb-x     { syntax: "<number>"; inherits: true; initial-value: 0.5 }
+@property --bb-lw    { syntax: "<number>"; inherits: true; initial-value: 1 }
+@property --bb-lh    { syntax: "<number>"; inherits: true; initial-value: 1 }
+@property --bb-edge  { syntax: "<number>"; inherits: true; initial-value: 1 }
+
+/* ================================================================== host */
+
+.bbeam {
+  --bb-bw: 1.5px;          /* stroke width */
+  --bb-r: 16px;            /* corner radius, used by halo */
+  --bb-pad: 28px;          /* how far the halo spills outward */
+  --bb-fade: 24px;         /* inner glow depth */
+  --bb-dur: 2.2s;          /* one revolution / one breath */
+  --bb-strength: 1;
+  --bb-hue-range: 28deg;
+  position: relative;
+  isolation: isolate;
+}
+
+/* ---- theme: what the highlight is made of, and how hard each layer pushes */
+.bbeam, .bbeam[data-bb-theme="dark"] {
+  --bb-hi: 255 255 255;
+  --bb-stroke-o: 0.95;
+  --bb-fill-o: 0.42;
+  --bb-halo-o: 0.55;
+  --bb-bri: 1.25;
+  --bb-sat: 1.2;
+  --bb-edge-tint: rgb(255 255 255 / 0.2);
+}
+.bbeam[data-bb-theme="light"] {
+  --bb-hi: 15 23 42;
+  --bb-stroke-o: 0.85;
+  --bb-fill-o: 0.34;
+  --bb-halo-o: 0.4;
+  --bb-bri: 1;
+  --bb-sat: 1.7;
+  --bb-edge-tint: rgb(15 23 42 / 0.1);
+}
+
+/* ---- palettes: nine colours as space-separated rgb, usable with an alpha */
+.bbeam, .bbeam[data-bb-palette="spectrum"] {
+  --bb-1: 255 50 100; --bb-2: 40 140 255; --bb-3: 50 200 80;
+  --bb-4: 30 185 170; --bb-5: 100 70 255; --bb-6: 40 140 255;
+  --bb-7: 255 120 40; --bb-8: 240 50 180; --bb-9: 180 40 240;
+}
+.bbeam[data-bb-palette="mono"] {
+  --bb-1: 180 180 180; --bb-2: 140 140 140; --bb-3: 160 160 160;
+  --bb-4: 130 130 130; --bb-5: 170 170 170; --bb-6: 150 150 150;
+  --bb-7: 190 190 190; --bb-8: 145 145 145; --bb-9: 165 165 165;
+}
+.bbeam[data-bb-palette="cool"] {
+  --bb-1: 100 80 220; --bb-2: 60 120 255; --bb-3: 80 100 200;
+  --bb-4: 50 140 220; --bb-5: 120 80 255; --bb-6: 70 130 255;
+  --bb-7: 140 100 240; --bb-8: 90 110 230; --bb-9: 130 70 255;
+}
+.bbeam[data-bb-palette="warm"] {
+  --bb-1: 255 80 50; --bb-2: 255 160 40; --bb-3: 255 120 60;
+  --bb-4: 255 200 50; --bb-5: 255 100 80; --bb-6: 255 180 60;
+  --bb-7: 255 60 60; --bb-8: 255 140 50; --bb-9: 255 90 70;
+}
+
+/* ================================================================ shared */
+
+.bbeam-ring, .bbeam-glow, .bbeam-halo {
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.bbeam-ring { inset: 0; padding: var(--bb-bw); z-index: 2;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+.bbeam-glow { inset: 0; z-index: 1; overflow: hidden; }
+.bbeam-halo {
+  inset: calc(var(--bb-pad) * -1);
+  padding: var(--bb-pad);
+  border-radius: calc(var(--bb-r) + var(--bb-pad));
+  z-index: -1;
+  display: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+.bbeam-lobes { position: absolute; inset: 0; display: none; }
+.bbeam-halo .bbeam-lobes { inset: var(--bb-pad); }
+
+.bbeam[data-bb-state="on"] .bbeam-ring { opacity: calc(var(--bb-stroke-o) * var(--bb-strength)); }
+.bbeam[data-bb-state="on"] .bbeam-glow { opacity: calc(var(--bb-fill-o)   * var(--bb-strength)); }
+.bbeam[data-bb-state="on"] .bbeam-halo { opacity: calc(var(--bb-halo-o)   * var(--bb-strength)); }
+.bbeam[data-bb-state="off"] .bbeam-ring,
+.bbeam[data-bb-state="off"] .bbeam-glow,
+.bbeam[data-bb-state="off"] .bbeam-halo { transition-duration: 0.45s; }
+
+/* Offscreen or finished: freeze every animation in the subtree. */
+.bbeam[data-bb-paused],
+.bbeam[data-bb-paused] * { animation-play-state: paused !important; }
+
+/* Colour drift. Gentle swing for travel and line, full circle for the rest. */
+@keyframes bb-hue-swing {
+  0%, 100% { filter: hue-rotate(calc(var(--bb-hue-range) * -1)) brightness(var(--bb-bri)) saturate(var(--bb-sat)); }
+  50%      { filter: hue-rotate(var(--bb-hue-range)) brightness(var(--bb-bri)) saturate(var(--bb-sat)); }
+}
+@keyframes bb-hue-spin {
+  from { filter: hue-rotate(0deg)   brightness(var(--bb-bri)) saturate(var(--bb-sat)); }
+  to   { filter: hue-rotate(360deg) brightness(var(--bb-bri)) saturate(var(--bb-sat)); }
+}
+
+/* ================================================================ travel */
+
+/* A bright arc runs round the whole border. The colours sit still around the
+   box; the mask sweeps past them, so the arc changes hue as it travels. */
+
+.bbeam[data-bb-mode="travel"] {
+  --bb-spots:
+    radial-gradient(ellipse 20% 28% at 33% -7%,  rgb(var(--bb-1)), transparent),
+    radial-gradient(ellipse 17% 25% at 12% -5%,  rgb(var(--bb-2)), transparent),
+    radial-gradient(ellipse 11% 50% at 2% 68%,   rgb(var(--bb-3)), transparent),
+    radial-gradient(ellipse 6% 25% at 2% 68%,    rgb(var(--bb-4)), transparent),
+    radial-gradient(ellipse 51% 23% at 74% 100%, rgb(var(--bb-5)), transparent),
+    radial-gradient(ellipse 24% 19% at 55% 100%, rgb(var(--bb-6)), transparent),
+    radial-gradient(ellipse 21% 23% at 94% 0%,   rgb(var(--bb-7)), transparent),
+    radial-gradient(ellipse 7% 30% at 100% 27%,  rgb(var(--bb-8)), transparent),
+    radial-gradient(ellipse 15% 34% at 100% 27%, rgb(var(--bb-9)), transparent);
+  --bb-spots-soft:
+    radial-gradient(ellipse 18% 25% at 33% -7%,  rgb(var(--bb-1) / 0.5), transparent),
+    radial-gradient(ellipse 15% 22% at 12% -5%,  rgb(var(--bb-2) / 0.5), transparent),
+    radial-gradient(ellipse 10% 45% at 2% 68%,   rgb(var(--bb-3) / 0.5), transparent),
+    radial-gradient(ellipse 46% 21% at 74% 100%, rgb(var(--bb-5) / 0.5), transparent),
+    radial-gradient(ellipse 22% 17% at 55% 100%, rgb(var(--bb-6) / 0.5), transparent),
+    radial-gradient(ellipse 19% 21% at 94% 0%,   rgb(var(--bb-7) / 0.5), transparent),
+    radial-gradient(ellipse 14% 31% at 100% 27%, rgb(var(--bb-9) / 0.5), transparent);
+  --bb-sweep:
+    conic-gradient(from var(--bb-angle),
+      transparent 0% 54%, rgb(var(--bb-hi) / 0.1) 57%, rgb(var(--bb-hi) / 0.3) 60%,
+      rgb(var(--bb-hi) / 0.6) 63%, rgb(var(--bb-hi) / 0.75) 66%, rgb(var(--bb-hi) / 0.6) 69%,
+      rgb(var(--bb-hi) / 0.3) 72%, rgb(var(--bb-hi) / 0.1) 75%, transparent 78% 100%);
+  --bb-arc:
+    conic-gradient(from var(--bb-angle),
+      transparent 0% 30%, rgb(255 255 255 / 0.1) 36%, rgb(255 255 255 / 0.35) 44%,
+      #fff 52% 80%, rgb(255 255 255 / 0.35) 86%, rgb(255 255 255 / 0.1) 92%, transparent 95% 100%);
+  animation: bb-travel var(--bb-dur) linear infinite;
+}
+@keyframes bb-travel { to { --bb-angle: 360deg } }
+
+.bbeam[data-bb-mode="travel"] .bbeam-ring {
+  background: var(--bb-sweep), var(--bb-spots);
+  -webkit-mask: var(--bb-arc), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+          mask: var(--bb-arc), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: intersect, exclude;
+  animation: bb-hue-swing 12s ease-in-out infinite;
+}
+.bbeam[data-bb-mode="travel"] .bbeam-glow {
+  background: var(--bb-spots-soft);
+  box-shadow: inset 0 0 9px 1px var(--bb-edge-tint);
+  -webkit-mask-image:
+    var(--bb-arc),
+    linear-gradient(#fff, transparent var(--bb-fade), transparent calc(100% - var(--bb-fade)), #fff),
+    linear-gradient(to right, #fff, transparent var(--bb-fade), transparent calc(100% - var(--bb-fade)), #fff);
+  -webkit-mask-composite: source-in, source-over;
+          mask-image:
+    var(--bb-arc),
+    linear-gradient(#fff, transparent var(--bb-fade), transparent calc(100% - var(--bb-fade)), #fff),
+    linear-gradient(to right, #fff, transparent var(--bb-fade), transparent calc(100% - var(--bb-fade)), #fff);
+          mask-composite: intersect, add;
+  animation: bb-hue-swing 12s ease-in-out infinite;
+}
+
+/* ================================================================== line */
+
+/* One pool of light slides along the bottom edge, swelling toward the middle
+   and fading at both ends. */
+
+.bbeam[data-bb-mode="line"] {
+  --bb-pool: radial-gradient(ellipse calc(78px * var(--bb-lw)) calc(60px * var(--bb-lh)) at calc(var(--bb-x) * 100%) 100%,
+               rgb(255 255 255 / var(--bb-edge)) 0%, rgb(255 255 255 / calc(var(--bb-edge) * 0.5)) 45%, transparent 100%);
+  --bb-pool-wide: radial-gradient(ellipse calc(96px * var(--bb-lw)) calc(86px * var(--bb-lh)) at calc(var(--bb-x) * 100%) 100%,
+               rgb(255 255 255 / var(--bb-edge)) 0%, rgb(255 255 255 / calc(var(--bb-edge) * 0.5)) 35%, transparent 100%);
+  --bb-line-spots:
+    radial-gradient(ellipse calc(36px * var(--bb-lw)) calc(36px * var(--bb-lh)) at calc(var(--bb-x) * 100%) calc(100% + 2px),
+      rgb(var(--bb-hi) / 0.55), transparent),
+    radial-gradient(ellipse calc(36px * var(--bb-lw)) calc(36px * var(--bb-lh)) at calc(var(--bb-x) * 100%) 100%,
+      rgb(var(--bb-1)), transparent),
+    radial-gradient(ellipse calc(30px * var(--bb-lw)) calc(32px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 39px) 100%,
+      rgb(var(--bb-2)), transparent),
+    radial-gradient(ellipse calc(33px * var(--bb-lw)) calc(28px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 36px) 100%,
+      rgb(var(--bb-3)), transparent),
+    radial-gradient(ellipse calc(29px * var(--bb-lw)) calc(34px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 54px) 100%,
+      rgb(var(--bb-9)), transparent),
+    radial-gradient(ellipse calc(27px * var(--bb-lw)) calc(30px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 51px) 100%,
+      rgb(var(--bb-7)), transparent),
+    radial-gradient(ellipse calc(36px * var(--bb-lw)) calc(24px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 21px) 100%,
+      rgb(var(--bb-5)), transparent),
+    radial-gradient(ellipse calc(30px * var(--bb-lw)) calc(22px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 21px) 100%,
+      rgb(var(--bb-6)), transparent),
+    radial-gradient(ellipse calc(25px * var(--bb-lw)) calc(28px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 66px) 100%,
+      rgb(var(--bb-8)), transparent),
+    radial-gradient(ellipse calc(23px * var(--bb-lw)) calc(30px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 66px) 100%,
+      rgb(var(--bb-4)), transparent);
+  --bb-line-soft:
+    radial-gradient(ellipse calc(60px * var(--bb-lw)) calc(40px * var(--bb-lh)) at calc(var(--bb-x) * 100%) 100%,
+      rgb(var(--bb-hi) / 0.35), transparent),
+    radial-gradient(ellipse calc(70px * var(--bb-lw)) calc(46px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 30px) 100%,
+      rgb(var(--bb-1) / 0.55), transparent),
+    radial-gradient(ellipse calc(70px * var(--bb-lw)) calc(46px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 30px) 100%,
+      rgb(var(--bb-5) / 0.55), transparent),
+    radial-gradient(ellipse calc(50px * var(--bb-lw)) calc(40px * var(--bb-lh)) at calc(var(--bb-x) * 100% + 62px) 100%,
+      rgb(var(--bb-2) / 0.5), transparent),
+    radial-gradient(ellipse calc(50px * var(--bb-lw)) calc(40px * var(--bb-lh)) at calc(var(--bb-x) * 100% - 62px) 100%,
+      rgb(var(--bb-7) / 0.5), transparent);
+  animation:
+    bb-travel-x  var(--bb-dur) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite,
+    bb-edge      var(--bb-dur) linear infinite,
+    bb-breathe-h calc(var(--bb-dur) * 1.3) ease-in-out infinite;
+}
+@keyframes bb-travel-x {
+  0%   { --bb-x: 0.06; --bb-lw: 0.5 }
+  50%  { --bb-x: 0.5;  --bb-lw: 1.5 }
+  100% { --bb-x: 0.94; --bb-lw: 0.5 }
+}
+@keyframes bb-edge {
+  0%, 12.5%   { --bb-edge: 0 }
+  32.5%, 67.5% { --bb-edge: 1 }
+  87.5%, 100% { --bb-edge: 0 }
+}
+@keyframes bb-breathe-h {
+  0%, 100% { --bb-lh: 0.8 }
+  25%      { --bb-lh: 1.25 }
+  55%      { --bb-lh: 0.85 }
+  80%      { --bb-lh: 1.3 }
+}
+
+.bbeam[data-bb-mode="line"] .bbeam-ring {
+  background: var(--bb-line-spots);
+  -webkit-mask: var(--bb-pool), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+          mask: var(--bb-pool), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite: intersect, exclude;
+  animation: bb-hue-swing 12s ease-in-out infinite;
+}
+.bbeam[data-bb-mode="line"] .bbeam-glow {
+  background: var(--bb-line-soft);
+  -webkit-mask-image: var(--bb-pool-wide);
+          mask-image: var(--bb-pool-wide);
+  animation: bb-hue-swing 8s ease-in-out infinite;
+}
+
+/* ======================================================= breathe and halo */
+
+/* Six soft lobes of colour sit on the edges and drift in and out of phase.
+   Each lobe is its own element with a gradient painted once, so the breathing
+   is opacity + transform only. */
+
+.bbeam[data-bb-mode="breathe"] .bbeam-lobes,
+.bbeam[data-bb-mode="halo"] .bbeam-lobes { display: block; }
+.bbeam[data-bb-mode="halo"] .bbeam-halo { display: block; }
+
+.bbeam[data-bb-mode="breathe"] .bbeam-ring,
+.bbeam[data-bb-mode="halo"] .bbeam-ring { background: rgb(var(--bb-hi) / 0.1); }
+
+.bbeam[data-bb-mode="breathe"] .bbeam-ring,
+.bbeam[data-bb-mode="breathe"] .bbeam-glow,
+.bbeam[data-bb-mode="halo"] .bbeam-ring,
+.bbeam[data-bb-mode="halo"] .bbeam-glow,
+.bbeam[data-bb-mode="halo"] .bbeam-halo { animation: bb-hue-spin calc(var(--bb-dur) * 7) linear infinite; }
+
+.bbeam[data-bb-mode="halo"] .bbeam-glow { display: none; }
+
+.bbeam-lobes i {
+  position: absolute;
+  left: calc(var(--cx) - var(--lw) / 2);
+  top: calc(var(--cy) - var(--lh) / 2);
+  width: var(--lw);
+  height: var(--lh);
+  background: radial-gradient(closest-side, rgb(var(--lc) / var(--lo, 1)), rgb(var(--lc) / 0));
+  scale: var(--ls, 1);
+  animation: bb-lobe calc(var(--bb-dur) * var(--k)) ease-in-out calc(var(--bb-dur) * var(--j) * -1) infinite alternate;
+}
+.bbeam-glow .bbeam-lobes i { --lo: 0.55; --ls: 1.15; }
+.bbeam-halo .bbeam-lobes i { --lo: 0.8;  --ls: 1.15; }
+
+.bbeam-lobes i:nth-child(1) { --cx: 24%;  --cy: 0%;   --lw: 46%; --lh: 130%; --lc: var(--bb-1); --dx: 10%;  --dy: 6%;   --k: 1.0; --j: 0 }
+.bbeam-lobes i:nth-child(2) { --cx: 76%;  --cy: 0%;   --lw: 40%; --lh: 110%; --lc: var(--bb-7); --dx: -9%;  --dy: 8%;   --k: 1.3; --j: 0.3 }
+.bbeam-lobes i:nth-child(3) { --cx: 100%; --cy: 40%;  --lw: 26%; --lh: 120%; --lc: var(--bb-8); --dx: -6%;  --dy: -14%; --k: 1.6; --j: 0.6 }
+.bbeam-lobes i:nth-child(4) { --cx: 82%;  --cy: 100%; --lw: 52%; --lh: 120%; --lc: var(--bb-5); --dx: 12%;  --dy: -6%;  --k: 0.85; --j: 0.9 }
+.bbeam-lobes i:nth-child(5) { --cx: 30%;  --cy: 100%; --lw: 42%; --lh: 110%; --lc: var(--bb-2); --dx: -10%; --dy: -8%;  --k: 1.45; --j: 0.45 }
+.bbeam-lobes i:nth-child(6) { --cx: 0%;   --cy: 58%;  --lw: 26%; --lh: 130%; --lc: var(--bb-3); --dx: 6%;   --dy: 14%;  --k: 1.15; --j: 0.75 }
+
+@keyframes bb-lobe {
+  from { opacity: 0.3; transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1)) scale(0.82, 1.12) }
+  to   { opacity: 1;   transform: translate(var(--dx), var(--dy)) scale(1.18, 0.88) }
+}
+
+/* Palettes with no hue to drift (mono) skip the filter animation entirely. */
+.bbeam[data-bb-hue="off"][data-bb-mode] .bbeam-ring,
+.bbeam[data-bb-hue="off"][data-bb-mode] .bbeam-glow,
+.bbeam[data-bb-hue="off"][data-bb-mode] .bbeam-halo {
+  animation: none;
+  filter: brightness(var(--bb-bri)) saturate(var(--bb-sat));
+}
+
+/* ============================================================== reduced */
+
+/* A calm still frame: the arc parked on the top-right, the pool mid-edge, the
+   lobes at rest. No colour drift. */
+@media (prefers-reduced-motion: reduce) {
+  .bbeam, .bbeam *, .bbeam-lobes i { animation: none !important; transition-duration: 0.01ms !important; }
+  .bbeam[data-bb-mode="travel"] { --bb-angle: 20deg; }
+  .bbeam[data-bb-mode="line"] { --bb-x: 0.5; --bb-lw: 1.4; --bb-lh: 1; --bb-edge: 1; }
+  .bbeam-lobes i { opacity: 0.7; }
+  .bbeam-ring, .bbeam-glow, .bbeam-halo { filter: brightness(var(--bb-bri)) saturate(var(--bb-sat)); }
+}

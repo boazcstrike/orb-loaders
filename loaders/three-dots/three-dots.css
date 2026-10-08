@@ -1,0 +1,322 @@
+/*!
+ * three-dots.css - eight single-element dot loaders.
+ *
+ * Upstream: three-dots, https://github.com/nzbin/three-dots
+ *           demo https://nzbin.github.io/three-dots/
+ * Author:   Zongbin (nzbin), Beijing
+ * Licence:  MIT
+ *
+ *   MIT License
+ *
+ *   Copyright (c) 2018 Zongbin
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the "Software"), to deal
+ *   in the Software without restriction, including without limitation the rights
+ *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *   copies of the Software, and to permit persons to whom the Software is
+ *   furnished to do so, subject to the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be included in all
+ *   copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *   SOFTWARE.
+ *
+ * Adapted for orb-loaders: eight of upstream's variants renamed .dot-<x> ->
+ * .td-<x>; hard-coded colour replaced by currentColor; every length derived from
+ * one custom property (--td-size, the dot diameter); linear timing replaced by
+ * eased curves with staggered delays; opacity/transform used where upstream
+ * animated background-colour or box-shadow; footprints are real margins so the
+ * loader lays out like a normal inline element; prefers-reduced-motion swaps the
+ * motion for a slow opacity pulse. See README.md "Changes from upstream".
+ *
+ * Usage:   <div class="td-flashing" role="status" aria-label="Loading"></div>
+ *          colour: set `color` on it or any ancestor.
+ *          size:   style="--td-size: 12px"  (dot diameter; default 10px)
+ */
+
+/* ------------------------------------------------------------------ shared */
+
+:is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+    .td-falling, .td-collision, .td-revolution, .td-windmill) {
+  --_s: var(--td-size, 10px);          /* dot diameter */
+  --_gap: calc(var(--_s) * 1.5);       /* centre-to-centre spacing */
+  --_off: 9999px;                      /* see "shadow dots" below */
+  --_x: 0px;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  flex: none;
+  width: var(--_s);
+  height: var(--_s);
+  border-radius: 50%;
+}
+
+:is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+    .td-falling, .td-collision, .td-revolution, .td-windmill)::before,
+:is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+    .td-falling, .td-collision, .td-revolution, .td-windmill)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--_s);
+  height: var(--_s);
+  border-radius: 50%;
+}
+
+/*
+ * Shadow dots (pulse, typing, falling). A box-shadow is clipped inside its own
+ * border box, so a dot drawn at offset 0 would vanish. Upstream parks the
+ * element 9999px to the left and offsets the shadow back. Here it is parked
+ * 9999px up instead: relative positioning leaves the layout box in place, and
+ * overflow above the page is never scrollable (left overflow is, in RTL).
+ */
+:is(.td-pulse, .td-typing, .td-falling) {
+  top: calc(var(--_off) * -1);
+}
+
+/* ---------------------------------------------------------------- flashing */
+/* Three dots fade in a wave. Opacity-style fade via colour, eased. */
+
+.td-flashing {
+  --_dim: color-mix(in srgb, currentColor 22%, transparent);
+  --_dur: 1.2s;
+  --_lag: 0.2s;
+  margin: calc(var(--_s) * .5) var(--_gap);
+  background-color: currentColor;
+  animation: td-flash var(--_dur) ease-in-out infinite;
+  animation-delay: calc(var(--_lag) * -1);
+}
+.td-flashing::before,
+.td-flashing::after {
+  background-color: currentColor;
+  animation: td-flash var(--_dur) ease-in-out infinite;
+}
+.td-flashing::before { left: calc(var(--_gap) * -1); animation-delay: calc(var(--_lag) * -2) }
+.td-flashing::after  { left: var(--_gap);            animation-delay: 0s }
+
+@keyframes td-flash {
+  0%, 100% { background-color: var(--_dim) }
+  35%, 50% { background-color: currentColor }
+}
+
+/* ------------------------------------------------------------------- pulse */
+/* Dots swell and settle, left to right. Rest size is 0.6 of --td-size, so they never vanish. */
+
+.td-pulse {
+  --_dur: 1.5s;
+  --_lag: 0.2s;
+  margin: calc(var(--_s) * .5) calc(var(--_gap) + var(--_s) * .25);
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-pulse var(--_dur) ease-in-out infinite;
+  animation-delay: calc(var(--_lag) * -1);
+}
+.td-pulse::before,
+.td-pulse::after {
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-pulse var(--_dur) ease-in-out infinite;
+}
+.td-pulse::before { --_x: calc(var(--_gap) * -1); animation-delay: calc(var(--_lag) * -2) }
+.td-pulse::after  { --_x: var(--_gap);            animation-delay: 0s }
+
+@keyframes td-pulse {
+  0%, 60%, 100% { box-shadow: var(--_x) var(--_off) 0 calc(var(--_s) * -.2) color-mix(in srgb, currentColor 75%, transparent) }
+  30%           { box-shadow: var(--_x) var(--_off) 0 calc(var(--_s) *  .25) currentColor }
+}
+
+/* ----------------------------------------------------------------- elastic */
+/* A stretch passes left, centre, right. Only scaleY on the root: the side
+   dots are its children, so horizontal scaling would drag them sideways. */
+
+.td-elastic {
+  --_dur: 1.5s;
+  margin: calc(var(--_s) * .4) var(--_gap);
+  background-color: currentColor;
+  animation: td-elastic var(--_dur) cubic-bezier(.4, 0, .2, 1) infinite;
+  animation-delay: calc(var(--_dur) * -.65); /* hump lands in the middle third */
+}
+.td-elastic::before,
+.td-elastic::after {
+  background-color: currentColor;
+  animation: td-elastic var(--_dur) cubic-bezier(.4, 0, .2, 1) infinite;
+}
+.td-elastic::before { left: calc(var(--_gap) * -1); animation-delay: 0s }
+.td-elastic::after  { left: var(--_gap);            animation-delay: calc(var(--_dur) * -.3) }
+
+@keyframes td-elastic {
+  0%        { transform: scaleY(1) }
+  17.5%     { transform: scaleY(1.7) }
+  35%, 100% { transform: scaleY(1) }
+}
+
+/* ------------------------------------------------------------------ typing */
+/* Chat-style typing indicator: each dot hops and brightens in turn. */
+
+.td-typing {
+  --_dur: 1.2s;
+  --_lag: 0.15s;
+  margin: calc(var(--_s) * .9) var(--_gap);
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-typing var(--_dur) ease-in-out infinite;
+  animation-delay: calc(var(--_lag) * -1);
+}
+.td-typing::before,
+.td-typing::after {
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-typing var(--_dur) ease-in-out infinite;
+}
+.td-typing::before { --_x: calc(var(--_gap) * -1); animation-delay: calc(var(--_lag) * -2) }
+.td-typing::after  { --_x: var(--_gap);            animation-delay: 0s }
+
+@keyframes td-typing {
+  0%, 60%, 100% { box-shadow: var(--_x) var(--_off) 0 0 color-mix(in srgb, currentColor 45%, transparent) }
+  30%           { box-shadow: var(--_x) calc(var(--_off) - var(--_s) * .9) 0 0 currentColor }
+}
+
+/* ----------------------------------------------------------------- falling */
+/* Dots drop in from above, hold, then fall away. Decelerate in, accelerate out. */
+
+.td-falling {
+  --_dur: 1.3s;
+  --_lag: 0.16s;
+  margin: calc(var(--_s) * 1.1) var(--_gap);
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-fall var(--_dur) infinite;
+  animation-delay: calc(var(--_lag) * -1);
+}
+.td-falling::before,
+.td-falling::after {
+  box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+  animation: td-fall var(--_dur) infinite;
+}
+.td-falling::before { --_x: calc(var(--_gap) * -1); animation-delay: calc(var(--_lag) * -2) }
+.td-falling::after  { --_x: var(--_gap);            animation-delay: 0s }
+
+@keyframes td-fall {
+  0% {
+    box-shadow: var(--_x) calc(var(--_off) - var(--_s)) 0 0 color-mix(in srgb, currentColor 0%, transparent);
+    animation-timing-function: cubic-bezier(.2, .8, .3, 1);
+  }
+  30%, 50% {
+    box-shadow: var(--_x) var(--_off) 0 0 currentColor;
+    animation-timing-function: cubic-bezier(.7, 0, .9, .4);
+  }
+  85%, 100% {
+    box-shadow: var(--_x) calc(var(--_off) + var(--_s)) 0 0 color-mix(in srgb, currentColor 0%, transparent);
+  }
+}
+
+/* --------------------------------------------------------------- collision */
+/* Newton's cradle: outer dots swing out and strike back in turn. */
+
+.td-collision {
+  --_dur: 1.6s;
+  margin: calc(var(--_s) * .5) calc(var(--_s) * 2.5);
+  background-color: currentColor;
+}
+.td-collision::before,
+.td-collision::after {
+  background-color: currentColor;
+  animation: td-collide var(--_dur) infinite;
+}
+.td-collision::before { --_dir: -1; left: calc(var(--_s) * -1) }
+.td-collision::after  { --_dir:  1; left: var(--_s); animation-delay: calc(var(--_dur) * -.5) }
+
+@keyframes td-collide {
+  0% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(.2, .6, .4, 1);
+  }
+  25% {
+    transform: translateX(calc(var(--_dir) * var(--_s) * 1.5));
+    animation-timing-function: cubic-bezier(.6, 0, .8, .4);
+  }
+  50%, 100% { transform: translateX(0) }
+}
+
+/* -------------------------------------------------------------- revolution */
+/* Two dots orbit a centre dot; the outer one is slower. Linear is correct
+   here: constant angular speed is the point. */
+
+.td-revolution {
+  margin: calc(var(--_gap) * 2);
+  background-color: currentColor;
+}
+.td-revolution::before,
+.td-revolution::after {
+  background-color: currentColor;
+  animation: td-orbit 1.2s linear infinite;
+}
+.td-revolution::before {
+  top: calc(var(--_gap) * -1);
+  transform-origin: 50% calc(var(--_gap) + var(--_s) * .5);
+}
+.td-revolution::after {
+  top: calc(var(--_gap) * -2);
+  transform-origin: 50% calc(var(--_gap) * 2 + var(--_s) * .5);
+  animation-duration: 2s;
+  animation-delay: -.6s;
+}
+
+@keyframes td-orbit {
+  to { transform: rotate(360deg) }
+}
+
+/* ---------------------------------------------------------------- windmill */
+/* Three dots on a triangle that turns in eased 120-degree steps. The three
+   dots are identical, so each step lands on a frame that looks like the first. */
+
+.td-windmill {
+  /* Triangle centroid sits one dot-diameter below the root dot's centre. */
+  margin: 0 var(--_s) calc(var(--_s) * 2);
+  background-color: currentColor;
+  transform-origin: 50% calc(var(--_s) * 1.5);
+  animation: td-windmill 1.8s infinite;
+}
+.td-windmill::before,
+.td-windmill::after {
+  top: calc(var(--_s) * 1.5);
+  background-color: currentColor;
+}
+.td-windmill::before { left: calc(var(--_s) * -.866) }
+.td-windmill::after  { left: calc(var(--_s) *  .866) }
+
+@keyframes td-windmill {
+  0%       { transform: rotate(0deg);   animation-timing-function: cubic-bezier(.65, 0, .35, 1) }
+  33.333%  { transform: rotate(120deg); animation-timing-function: cubic-bezier(.65, 0, .35, 1) }
+  66.667%  { transform: rotate(240deg); animation-timing-function: cubic-bezier(.65, 0, .35, 1) }
+  100%     { transform: rotate(360deg) }
+}
+
+/* ---------------------------------------------------------- reduced motion */
+/* Keep the dots in their rest pose and breathe the whole loader slowly.
+   !important on the duration survives the common "kill all animation"
+   reset (`* { animation-duration: .001ms !important }`), which would
+   otherwise turn this into a flicker. */
+
+@keyframes td-calm {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: .4 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+      .td-falling, .td-collision, .td-revolution, .td-windmill) {
+    animation: td-calm 2.4s ease-in-out infinite;
+    animation-duration: 2.4s !important;
+    animation-delay: 0s;
+  }
+  :is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+      .td-falling, .td-collision, .td-revolution, .td-windmill)::before,
+  :is(.td-flashing, .td-pulse, .td-elastic, .td-typing,
+      .td-falling, .td-collision, .td-revolution, .td-windmill)::after {
+    animation: none !important;
+  }
+}

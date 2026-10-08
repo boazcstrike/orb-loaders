@@ -1,0 +1,342 @@
+/*!
+ * activity-indicators.css - eight CSS-only activity indicators, tuned for orb-loaders.
+ *
+ * Upstream web original: Loaders.css, https://github.com/ConnorAtherton/loaders.css
+ *   Copyright (c) 2016 Connor Atherton. Licence: MIT (stated in that repo's
+ *   README.md "Licence" section and in package.json / bower.json; the repo has no
+ *   separate LICENSE file, which is why GitHub shows "no licence detected").
+ *   Animation concepts, keyframes and markup shapes come from its src/animations.
+ * Native port, used only as a reference for which variants are worth shipping:
+ *   NVActivityIndicatorView, https://github.com/ninjaprox/NVActivityIndicatorView
+ *   Copyright (c) 2016 Vinh Nguyen (ninjaprox). MIT. It credits Loaders.css as
+ *   its inspiration.
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 Connor Atherton
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Adapted for orb-loaders: subset of eight variants; classes renamed `.ai-*`;
+ * colour is `currentColor`; every dimension derives from --ai-size (default
+ * 40px) instead of fixed pixels; Sass randomness and hard-coded offsets
+ * replaced with plain CSS; retuned easing and minimum feature sizes; calm
+ * prefers-reduced-motion fallback. See README.
+ *
+ * Usage:   <div class="ai-ball-pulse" role="status" aria-label="Loading">
+ *            <div></div><div></div><div></div></div>
+ * Sizing:  style="--ai-size: 24px"   Colour: set `color`.
+ * Animates transform and opacity only, so it stays on the compositor.
+ *
+ * Easing used throughout, written out because custom properties would add a
+ * global token:
+ *   sine in-out   cubic-bezier(.37, 0, .63, 1)
+ *   quart out     cubic-bezier(.25, 1, .5, 1)
+ *   soft overshoot (upstream) cubic-bezier(.2, .68, .18, 1.08)
+ */
+
+/* ------------------------------------------------------------- ball-pulse */
+/* three <div> */
+.ai-ball-pulse {
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-ball-pulse > * {
+  width: max(4px, calc(var(--ai-size, 40px) * .26));
+  height: max(4px, calc(var(--ai-size, 40px) * .26));
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: ai-ball-pulse .8s infinite cubic-bezier(.2, .68, .18, 1.08) both;
+  animation-delay: calc((var(--i) - 3) * .12s);
+}
+.ai-ball-pulse > *:nth-child(1) { --i: 1; }
+.ai-ball-pulse > *:nth-child(2) { --i: 2; }
+.ai-ball-pulse > *:nth-child(3) { --i: 3; }
+/* Upstream shrank to scale .1, which made the dot vanish. .35 keeps it there. */
+@keyframes ai-ball-pulse {
+  0%   { transform: scale(1); opacity: 1; }
+  45%  { transform: scale(.35); opacity: .6; }
+  80%  { transform: scale(1); opacity: 1; }
+}
+
+/* -------------------------------------------------------- ball-pulse-sync */
+/* three <div> */
+.ai-ball-pulse-sync {
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-ball-pulse-sync > * {
+  width: max(4px, calc(var(--ai-size, 40px) * .26));
+  height: max(4px, calc(var(--ai-size, 40px) * .26));
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: ai-ball-pulse-sync .7s infinite cubic-bezier(.37, 0, .63, 1) both;
+  animation-delay: calc((var(--i) - 3) * .08s);
+}
+.ai-ball-pulse-sync > *:nth-child(1) { --i: 1; }
+.ai-ball-pulse-sync > *:nth-child(2) { --i: 2; }
+.ai-ball-pulse-sync > *:nth-child(3) { --i: 3; }
+/* Travel is a fraction of --ai-size (upstream: a fixed 10px). */
+@keyframes ai-ball-pulse-sync {
+  33%  { transform: translateY(calc(var(--ai-size, 40px) * .2)); }
+  66%  { transform: translateY(calc(var(--ai-size, 40px) * -.2)); }
+  100% { transform: translateY(0); }
+}
+
+/* --------------------------------------------------------- ball-grid-pulse */
+/* nine <div> */
+.ai-ball-grid-pulse {
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  gap: calc(var(--ai-size, 40px) * .08);
+}
+.ai-ball-grid-pulse > * {
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: ai-ball-grid-pulse 1s infinite cubic-bezier(.37, 0, .63, 1) both;
+}
+/* The compiled upstream stylesheet bakes in one random roll of delays and
+   durations; that roll is kept here as literal values so it is deterministic. */
+.ai-ball-grid-pulse > *:nth-child(1) { animation-delay: .22s; animation-duration: .9s; }
+.ai-ball-grid-pulse > *:nth-child(2) { animation-delay: .64s; animation-duration: 1s; }
+.ai-ball-grid-pulse > *:nth-child(3) { animation-delay: -.15s; animation-duration: .63s; }
+.ai-ball-grid-pulse > *:nth-child(4) { animation-delay: -.03s; animation-duration: 1.24s; }
+.ai-ball-grid-pulse > *:nth-child(5) { animation-delay: .08s; animation-duration: 1.37s; }
+.ai-ball-grid-pulse > *:nth-child(6) { animation-delay: .43s; animation-duration: 1.55s; }
+.ai-ball-grid-pulse > *:nth-child(7) { animation-delay: .05s; animation-duration: .7s; }
+.ai-ball-grid-pulse > *:nth-child(8) { animation-delay: .05s; animation-duration: .97s; }
+.ai-ball-grid-pulse > *:nth-child(9) { animation-delay: .3s; animation-duration: .63s; }
+@keyframes ai-ball-grid-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(.45); opacity: .4; }
+}
+
+/* --------------------------------------------------- ball-clip-rotate-multiple */
+/* two <div>: outer ring, inner ring */
+.ai-ball-clip-rotate-multiple {
+  display: block;
+  --ai-ring: max(2px, calc(var(--ai-size, 40px) * .07));
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  position: relative;
+}
+.ai-ball-clip-rotate-multiple > * {
+  position: absolute;
+  inset: 0;
+  border: var(--ai-ring) solid currentColor;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 100%;
+  animation: ai-ball-clip-rotate-multiple 1.2s infinite cubic-bezier(.37, 0, .63, 1) both;
+}
+.ai-ball-clip-rotate-multiple > *:last-child {
+  inset: 28.5%;
+  border-color: currentColor transparent currentColor transparent;
+  animation-duration: .8s;
+  animation-direction: reverse;
+}
+@keyframes ai-ball-clip-rotate-multiple {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(.6); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* -------------------------------------------------------- ball-scale-ripple */
+/* two <div>: upstream had one ring; a second, half a cycle behind, keeps the
+   centre from going blank between pulses */
+.ai-ball-scale-ripple {
+  display: block;
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  position: relative;
+}
+.ai-ball-scale-ripple > * {
+  position: absolute;
+  inset: 0;
+  border: max(2px, calc(var(--ai-size, 40px) * .05)) solid currentColor;
+  border-radius: 100%;
+  animation:
+    ai-ripple-scale 1.6s infinite cubic-bezier(.25, 1, .5, 1) both,
+    ai-ripple-fade 1.6s infinite linear both;
+}
+.ai-ball-scale-ripple > *:nth-child(2) { animation-delay: -.8s; }
+@keyframes ai-ripple-scale {
+  0%   { transform: scale(.1); }
+  100% { transform: scale(1); }
+}
+@keyframes ai-ripple-fade {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ---------------------------------------------------- line-scale-pulse-out */
+/* five <div> */
+.ai-line-scale-pulse-out {
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ai-line-scale-pulse-out > * {
+  width: max(3px, calc(var(--ai-size, 40px) * .12));
+  height: 90%;
+  border-radius: 2px;
+  background-color: currentColor;
+  animation: ai-line-scale-pulse-out 1s infinite cubic-bezier(.37, 0, .63, 1) both;
+}
+/* Delays run centre-out, as upstream: the middle bar leads, outer bars trail. */
+.ai-line-scale-pulse-out > *:nth-child(3) { animation-delay: -.6s; }
+.ai-line-scale-pulse-out > *:nth-child(2),
+.ai-line-scale-pulse-out > *:nth-child(4) { animation-delay: -.4s; }
+.ai-line-scale-pulse-out > *:nth-child(1),
+.ai-line-scale-pulse-out > *:nth-child(5) { animation-delay: -.2s; }
+@keyframes ai-line-scale-pulse-out {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50%      { transform: scaleY(.4); opacity: .55; }
+}
+
+/* ---------------------------------------------------------- line-spin-fade */
+/* eight <div> */
+.ai-line-spin-fade {
+  display: block;
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  position: relative;
+}
+.ai-line-spin-fade > * {
+  position: absolute;
+  top: 0;
+  left: calc(50% - max(1px, calc(var(--ai-size, 40px) * .04)));
+  width: max(2px, calc(var(--ai-size, 40px) * .08));
+  height: calc(var(--ai-size, 40px) * .28);
+  border-radius: 999px;
+  background-color: currentColor;
+  transform-origin: 50% calc(var(--ai-size, 40px) * .5);
+  transform: rotate(calc(var(--i) * 45deg));
+  animation: ai-line-spin-fade 1s infinite cubic-bezier(.25, 1, .5, 1) both;
+  animation-delay: calc((var(--i) - 8) * .125s);
+}
+.ai-line-spin-fade > *:nth-child(1) { --i: 1; }
+.ai-line-spin-fade > *:nth-child(2) { --i: 2; }
+.ai-line-spin-fade > *:nth-child(3) { --i: 3; }
+.ai-line-spin-fade > *:nth-child(4) { --i: 4; }
+.ai-line-spin-fade > *:nth-child(5) { --i: 5; }
+.ai-line-spin-fade > *:nth-child(6) { --i: 6; }
+.ai-line-spin-fade > *:nth-child(7) { --i: 7; }
+.ai-line-spin-fade > *:nth-child(8) { --i: 8; }
+/* Upstream positioned each line with hard-coded px offsets and pulsed them all
+   alike. Here they are rotated about the centre and fade as a tail behind a
+   bright head. */
+@keyframes ai-line-spin-fade {
+  0%       { opacity: 1; }
+  70%, 100% { opacity: .16; }
+}
+
+/* ----------------------------------------------------------- ball-triangle-path */
+/* three <div> */
+.ai-ball-triangle-path {
+  display: block;
+  --ai-a: calc(var(--ai-size, 40px) * .7);
+  --ai-d: max(6px, calc(var(--ai-size, 40px) * .2));
+  width: var(--ai-size, 40px);
+  height: var(--ai-size, 40px);
+  position: relative;
+}
+.ai-ball-triangle-path > * {
+  position: absolute;
+  width: var(--ai-d);
+  height: var(--ai-d);
+  border: max(1.5px, calc(var(--ai-size, 40px) * .04)) solid currentColor;
+  border-radius: 100%;
+  animation: 2s infinite cubic-bezier(.37, 0, .63, 1) both;
+}
+.ai-ball-triangle-path > *:nth-child(1) {
+  left: calc(50% - var(--ai-a) / 2 - var(--ai-d) / 2);
+  top: calc(50% + var(--ai-a) / 2 - var(--ai-d) / 2);
+  animation-name: ai-triangle-path-1;
+}
+.ai-ball-triangle-path > *:nth-child(2) {
+  left: calc(50% - var(--ai-d) / 2);
+  top: calc(50% - var(--ai-a) / 2 - var(--ai-d) / 2);
+  animation-name: ai-triangle-path-2;
+}
+.ai-ball-triangle-path > *:nth-child(3) {
+  left: calc(50% + var(--ai-a) / 2 - var(--ai-d) / 2);
+  top: calc(50% + var(--ai-a) / 2 - var(--ai-d) / 2);
+  animation-name: ai-triangle-path-3;
+}
+/* Offsets scale with --ai-size (upstream: fixed 50px), so the path stays
+   inside the box at any size. */
+@keyframes ai-triangle-path-1 {
+  33%  { transform: translate(calc(var(--ai-a) / 2), calc(var(--ai-a) * -1)); }
+  66%  { transform: translate(var(--ai-a), 0); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes ai-triangle-path-2 {
+  33%  { transform: translate(calc(var(--ai-a) / 2), var(--ai-a)); }
+  66%  { transform: translate(calc(var(--ai-a) / -2), var(--ai-a)); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes ai-triangle-path-3 {
+  33%  { transform: translate(calc(var(--ai-a) * -1), 0); }
+  66%  { transform: translate(calc(var(--ai-a) / -2), calc(var(--ai-a) * -1)); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ---------------------------------------------------------- reduced motion */
+/* Calm fallback: every indicator holds one static composition and breathes in
+   opacity over 3s. Nothing moves, rotates or scales. */
+@keyframes ai-calm { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-ball-pulse, .ai-ball-pulse-sync, .ai-ball-grid-pulse,
+  .ai-ball-clip-rotate-multiple, .ai-ball-scale-ripple,
+  .ai-line-scale-pulse-out, .ai-line-spin-fade, .ai-ball-triangle-path {
+    animation: ai-calm 3s infinite cubic-bezier(.37, 0, .63, 1);
+  }
+  .ai-ball-pulse > *, .ai-ball-pulse-sync > *, .ai-ball-grid-pulse > *,
+  .ai-ball-clip-rotate-multiple > *, .ai-ball-scale-ripple > *,
+  .ai-line-scale-pulse-out > *, .ai-line-spin-fade > *,
+  .ai-ball-triangle-path > * {
+    animation: none;
+  }
+  .ai-ball-pulse > *:nth-child(1) { transform: scale(.55); opacity: .6; }
+  .ai-ball-pulse > *:nth-child(2) { transform: scale(.8); opacity: .8; }
+  .ai-ball-pulse-sync > *:nth-child(1) { transform: translateY(calc(var(--ai-size, 40px) * .12)); }
+  .ai-ball-pulse-sync > *:nth-child(3) { transform: translateY(calc(var(--ai-size, 40px) * -.12)); }
+  .ai-ball-grid-pulse > * { transform: scale(.8); }
+  .ai-ball-grid-pulse > *:nth-child(even) { opacity: .55; }
+  .ai-ball-clip-rotate-multiple > *:last-child { transform: rotate(90deg); }
+  .ai-ball-scale-ripple > *:nth-child(1) { transform: scale(.55); }
+  .ai-ball-scale-ripple > *:nth-child(2) { transform: scale(1); opacity: .35; }
+  .ai-line-scale-pulse-out > *:nth-child(2),
+  .ai-line-scale-pulse-out > *:nth-child(4) { transform: scaleY(.7); }
+  .ai-line-scale-pulse-out > *:nth-child(1),
+  .ai-line-scale-pulse-out > *:nth-child(5) { transform: scaleY(.45); }
+  .ai-line-spin-fade > * { opacity: calc(.12 + var(--i) * .11); }
+}

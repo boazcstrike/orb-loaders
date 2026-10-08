@@ -1,0 +1,305 @@
+/*!
+ * think-shimmer.css — AI "thinking" text and status indicators.
+ *
+ * Adapted from Ant Design X (https://github.com/ant-design/x, https://x.ant.design/components/think)
+ * by Ant Group / Ant UED. Studied: the Think component (packages/x/components/think),
+ * its `blink` text sweep (packages/x/components/style/motion/blink.ts), the Bubble
+ * loading dots (packages/x/components/bubble/style/bubble.ts) and ThoughtChain.
+ *
+ * Ant Design X is licensed MIT (packages/x/package.json "license": "MIT"):
+ *
+ *   MIT LICENSE
+ *
+ *   Copyright (c) 2015-present Ant UED, https://xtech.antfin.com/
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining
+ *   a copy of this software and associated documentation files (the
+ *   "Software"), to deal in the Software without restriction, including
+ *   without limitation the rights to use, copy, modify, merge, publish,
+ *   distribute, sublicense, and/or sell copies of the Software, and to
+ *   permit persons to whom the Software is furnished to do so, subject to
+ *   the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be
+ *   included in all copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Adapted for orb-loaders: the React + antd + cssinjs runtime is gone; this is
+ * plain CSS driven by the `data-state` attribute think-shimmer.js sets. Colours
+ * come from `currentColor` (no Ant brand blue); sizes are in `em`, so the
+ * `size` option scales every part together.
+ *
+ * Custom properties you may set on the host or any ancestor:
+ *   --ts-done   colour of the finished check mark (default: currentColor)
+ */
+
+.ts {
+  --ts-dim: currentColor;           /* secondary ink */
+  --ts-faint: currentColor;         /* hairlines, tracks */
+  --ts-tint: rgba(128, 128, 128, .12);
+  --ts-tint-done: rgba(128, 128, 128, .2);
+  --ts-ease: cubic-bezier(.2, .8, .2, 1);          /* expo-out: arrivals */
+  --ts-ease-io: cubic-bezier(.45, .05, .35, .95);  /* loops */
+
+  font-size: var(--ts-size, 14px);
+  line-height: 1.45;
+  position: relative;
+}
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .ts {
+    /* 62% ink holds 5:1 on both glass themes while still reading as "dimmer". */
+    --ts-dim: color-mix(in srgb, currentColor 62%, transparent);
+    --ts-faint: color-mix(in srgb, currentColor 16%, transparent);
+    --ts-tint: color-mix(in srgb, currentColor 8%, transparent);
+    --ts-tint-done: color-mix(in srgb, var(--ts-done, currentColor) 14%, transparent);
+  }
+}
+.ts, .ts *, .ts *::before, .ts *::after { box-sizing: border-box }
+
+.ts-sr {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ================================================================ shimmer */
+
+.ts-label { display: inline-block }
+
+/*
+ * The sweep. Upstream animates a 50%-wide transparent->ink->transparent gradient
+ * linearly at 1s. Here the band is a soft, slightly skewed 3-stop gradient on a
+ * 300%-wide layer so it starts and ends fully off the text; the ease-in-out
+ * curve makes it accelerate across, then rest off-screen between passes, which
+ * reads as a breath instead of a conveyor belt.
+ */
+.ts:not(.ts--steps)[data-state="active"] .ts-shim,
+.ts--steps .ts-step[data-s="active"] .ts-shim {
+  -webkit-text-fill-color: transparent;
+  background-image:
+    linear-gradient(100deg, transparent 38%, currentColor 50%, transparent 62%),
+    linear-gradient(var(--ts-dim), var(--ts-dim));
+  background-size: 300% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  background-position: 100% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: ts-sweep 2.2s var(--ts-ease-io) infinite;
+}
+@keyframes ts-sweep {
+  from { background-position: 100% 0, 0 0 }
+  to   { background-position: 0 0, 0 0 }
+}
+
+/* ================================================================== icons */
+
+.ts-icon {
+  position: relative; flex: none; display: inline-block;
+  width: 1.15em; height: 1.15em;
+}
+.ts-icon svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  overflow: visible; fill: none;
+}
+
+/* spinner: a ring with a breathing arc, so it is never a plain wheel */
+.ts-spin {
+  stroke-width: 2.4; stroke-linecap: round;
+  animation: ts-rot 1s linear infinite;
+  transition: opacity .28s var(--ts-ease), scale .28s var(--ts-ease);
+}
+.ts-spin .ts-track { stroke: var(--ts-faint) }
+.ts-spin .ts-arc {
+  stroke: currentColor;
+  stroke-dasharray: 14 86;
+  animation: ts-breathe-arc 1.6s var(--ts-ease-io) infinite;
+}
+@keyframes ts-rot { to { transform: rotate(360deg) } }
+@keyframes ts-breathe-arc {
+  0%, 100% { stroke-dasharray: 14 86 }
+  50%      { stroke-dasharray: 40 60 }
+}
+
+/* check: drawn in with a stroke-dash reveal */
+.ts-check {
+  stroke: var(--ts-done, currentColor); stroke-width: 2.4;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0; scale: .6;
+  transition: opacity .2s var(--ts-ease), scale .4s var(--ts-ease);
+}
+.ts-check path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .45s var(--ts-ease) .1s }
+
+/* the "done" swap, written once for every place a spinner/check pair lives */
+.ts[data-state="done"] .ts-icon > .ts-spin,
+.ts[data-state="done"] .ts-icon > .ts-spark,
+.ts-step[data-s="done"] .ts-spin,
+.ts-step[data-s="pending"] .ts-spin { opacity: 0; scale: .5 }
+.ts[data-state="done"] .ts-icon > .ts-check,
+.ts-step[data-s="done"] .ts-check { opacity: 1; scale: 1 }
+.ts[data-state="done"] .ts-icon > .ts-check path,
+.ts-step[data-s="done"] .ts-check path { stroke-dashoffset: 0 }
+.ts-step[data-s="pending"] .ts-spin { opacity: 0 }
+
+/* shimmer + cycle: the icon slot opens when the work finishes */
+.ts--shimmer { display: inline-flex; align-items: center; white-space: nowrap }
+.ts--shimmer .ts-icon {
+  width: 0; margin-inline-end: 0; opacity: 0;
+  transition: width .38s var(--ts-ease), margin .38s var(--ts-ease), opacity .3s var(--ts-ease);
+}
+.ts--shimmer[data-state="done"] .ts-icon { width: 1.15em; margin-inline-end: .5em; opacity: 1 }
+
+/* ================================================================ cycle */
+
+.ts--cycle { display: inline-flex; align-items: center; gap: .55em; white-space: nowrap }
+.ts-icon .ts-spark {
+  fill: currentColor; stroke: none;
+  animation: ts-spark 2.4s var(--ts-ease-io) infinite;
+  transition: opacity .28s var(--ts-ease);
+}
+@keyframes ts-spark {
+  0%   { transform: rotate(0deg) scale(.86) }
+  50%  { transform: rotate(45deg) scale(1.12) }
+  100% { transform: rotate(90deg) scale(.86) }
+}
+
+/* ================================================================== dots */
+
+.ts--dots { display: inline-flex }
+.ts-bubble {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  padding: .72em .95em; border-radius: 999px;
+  background: var(--ts-tint);
+  transition: background-color .35s var(--ts-ease);
+}
+.ts--dots[data-state="done"] .ts-bubble { background: var(--ts-tint-done) }
+.ts-dots {
+  display: inline-flex; align-items: center; gap: .3em; height: .4em;
+  transition: opacity .26s var(--ts-ease), scale .26s var(--ts-ease);
+}
+.ts--dots[data-state="done"] .ts-dots { opacity: 0; scale: .5 }
+.ts-dot {
+  width: .4em; height: .4em; border-radius: 50%; background: currentColor;
+  animation: ts-hop 1.3s var(--ts-ease-io) infinite;
+}
+.ts-dot:nth-child(2) { animation-delay: .15s }
+.ts-dot:nth-child(3) { animation-delay: .3s }
+/* Upstream: 4px dots hop +-4px for 0.2s of a 2s cycle, linear. Here: one hop
+   with a scale + opacity swell, 70% of the cycle spent resting. */
+@keyframes ts-hop {
+  0%, 70%, 100% { transform: translateY(0) scale(.78); opacity: .38 }
+  28%           { transform: translateY(-.3em) scale(1); opacity: 1 }
+}
+.ts--dots .ts-check {
+  inset: 0; margin: auto; width: 1.15em; height: 1.15em;
+  position: absolute; fill: none;
+}
+.ts--dots[data-state="done"] .ts-check { opacity: 1; scale: 1 }
+.ts--dots[data-state="done"] .ts-check path { stroke-dashoffset: 0 }
+
+/* =============================================================== thought */
+
+.ts--thought { display: block; max-width: 100% }
+.ts-head {
+  appearance: none; border: 0; background: transparent; font: inherit; color: var(--ts-dim);
+  display: inline-flex; align-items: center; gap: .55em;
+  padding: .2em .45em .2em .1em; margin-inline-start: -.1em; border-radius: .5em;
+  cursor: pointer; text-align: start;
+  transition: color .2s var(--ts-ease);
+}
+div.ts-head { cursor: default }
+button.ts-head:hover { color: currentColor }
+.ts-head .ts-icon { width: 1.25em; height: 1.25em; color: currentColor }
+.ts-title { display: inline-block; min-width: 0 }
+.ts-chev {
+  flex: none; width: .85em; height: .85em; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .3s var(--ts-ease);
+}
+.ts--thought[data-open="true"] .ts-chev { transform: rotate(90deg) }
+
+/* grid 0fr -> 1fr animates to the content's real height with no JS measuring */
+.ts-body {
+  display: grid; grid-template-rows: 1fr; opacity: 1;
+  transition: grid-template-rows .32s var(--ts-ease), opacity .26s var(--ts-ease);
+}
+.ts--thought[data-open="false"] .ts-body {
+  grid-template-rows: 0fr; opacity: 0; visibility: hidden;
+  transition: grid-template-rows .26s var(--ts-ease), opacity .16s ease-out, visibility 0s linear .26s;
+}
+.ts-body-in { overflow: hidden; min-height: 0 }
+.ts-content {
+  margin-top: .55em; padding-inline-start: .95em; max-width: 56ch;
+  border-inline-start: 2px solid var(--ts-faint);
+  color: var(--ts-dim); font-size: .95em;
+}
+
+/* ================================================================ steps */
+
+.ts--steps { display: block }
+.ts-steps { list-style: none; margin: 0; padding: 0 }
+.ts-step {
+  position: relative; display: flex; align-items: flex-start; gap: .75em;
+  padding-bottom: 1em;
+}
+.ts-step:last-child { padding-bottom: 0 }
+.ts-node { position: relative; flex: none; width: 1.15em; height: 1.15em; margin-top: .15em }
+.ts-node svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none }
+.ts-pend {
+  position: absolute; left: 50%; top: 50%; width: .45em; height: .45em; margin: -.225em 0 0 -.225em;
+  border-radius: 50%; border: 1.5px solid var(--ts-dim);
+  transition: opacity .25s var(--ts-ease), scale .25s var(--ts-ease);
+}
+.ts-step:not([data-s="pending"]) .ts-pend { opacity: 0; scale: .4 }
+
+.ts-step .ts-label { color: var(--ts-dim); transition: color .35s var(--ts-ease) }
+.ts-step[data-s="active"] .ts-label { color: currentColor }
+.ts-step[data-s="done"] .ts-label { color: color-mix(in srgb, currentColor 78%, transparent) }
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  .ts-step[data-s="done"] .ts-label { color: currentColor }
+}
+
+/* connector: a hairline track with a fill that grows once the step above is done */
+.ts-step:not(:last-child)::before,
+.ts-step:not(:last-child)::after {
+  content: ""; position: absolute; inset-inline-start: .575em; top: 1.55em; bottom: -.1em;
+  width: 1px;
+}
+.ts-step:not(:last-child)::before { background: var(--ts-faint) }
+.ts-step:not(:last-child)::after {
+  background: var(--ts-dim); transform: scaleY(0); transform-origin: top;
+  transition: transform .5s var(--ts-ease);
+}
+.ts-step[data-s="done"]:not(:last-child)::after { transform: scaleY(1) }
+
+/* ================================================================= offscreen */
+
+.ts[data-paused], .ts[data-paused] *, .ts[data-paused] *::before, .ts[data-paused] *::after {
+  animation-play-state: paused !important;
+}
+
+/* ============================================================ reduced motion */
+
+/* No sweep, no hop, no spin. State changes still show, instantly. The spinner
+   becomes a slow fade, which signals "working" without moving anything. */
+@media (prefers-reduced-motion: reduce) {
+  .ts *, .ts *::before, .ts *::after {
+    animation: none !important; transition: none !important;
+  }
+  .ts[data-state="active"] .ts-icon > .ts-spin,
+  .ts[data-state="active"] .ts-icon > .ts-spark,
+  .ts--dots[data-state="active"] .ts-dots,
+  .ts-step[data-s="active"] .ts-spin {
+    animation: ts-fade 2s ease-in-out infinite !important;
+  }
+  .ts .ts-dot { opacity: .55 }
+  .ts .ts-dot:nth-child(2) { opacity: .8 }
+  .ts .ts-dot:nth-child(3) { opacity: 1 }
+  .ts .ts-dot { transform: scale(.9) }
+}
+@keyframes ts-fade { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }

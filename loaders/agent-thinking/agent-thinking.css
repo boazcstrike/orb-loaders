@@ -1,0 +1,140 @@
+/*!
+ * agent-thinking.css — styles for agent-thinking.js. Every class is prefixed `ath-`.
+ *
+ * Ported from solid-thinking-orbs (MIT) https://github.com/Mvkweb/solid-thinking-orbs
+ * Copyright (c) 2026 Jakub Antalik (Original React Implementation)
+ * Copyright (c) 2026 Mvkweb (SolidJS Port)
+ * Design credit also given upstream to Alex Brinza (https://x.com/a_brinza).
+ * Full MIT notice: see the header of agent-thinking.js.
+ *
+ * Adapted for orb-loaders: CSS module + inline styles translated to plain scoped CSS;
+ * all ink derives from `currentColor` (no hardcoded greys), so it themes itself.
+ */
+
+.ath {
+  --ath-fs: 13px;                       /* set inline by the JS from the `size` option */
+  --ath-lh: 20px;
+  --ath-ft: 0px;                        /* top / bottom scroll-fade depth, driven by the JS */
+  --ath-fb: 0px;
+  --ath-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ath-dim: 0.62;                      /* opacity of anything that is not the live line */
+
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  font-family: inherit;
+  font-size: var(--ath-fs);
+  line-height: var(--ath-lh);
+  color: inherit;
+  letter-spacing: -0.005em;
+  animation: ath-block-in 320ms var(--ath-ease) both;
+}
+@keyframes ath-block-in { from { opacity: 0 } to { opacity: 1 } }
+
+/* ---- header (the toggle) ---- */
+.ath-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.46em;
+  align-self: flex-start;
+  min-height: var(--ath-lh);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ath-header:focus-visible { outline: 2px solid currentColor; outline-offset: 3px }
+
+.ath-label { font-weight: 500; font-variant-numeric: tabular-nums }
+.ath-rest { opacity: var(--ath-dim) }
+.ath-chevron {
+  width: 0.92em;
+  height: 0.92em;
+  flex: none;
+  opacity: var(--ath-dim);
+  transform: rotate(180deg);
+  transition: transform 280ms var(--ath-ease), opacity 160ms ease;
+}
+.ath-header[aria-expanded="true"] .ath-chevron { transform: rotate(0deg) }
+.ath-header:hover .ath-chevron { opacity: 1 }
+
+/* Shimmer is a mask on the label: one slow highlight sweeps left to right, then the
+   text rests dim for a beat. No colour is hardcoded, so it works on any background. */
+.ath-label.is-shimmer {
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  animation: ath-shine 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes ath-shine {
+  0%, 15%   { -webkit-mask-position: 130% 0; mask-position: 130% 0 }
+  85%, 100% { -webkit-mask-position: -30% 0; mask-position: -30% 0 }
+}
+
+/* ---- collapsible body ---- */
+.ath-collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 320ms var(--ath-ease), opacity 220ms ease;
+}
+.ath-collapsible.is-collapsed { grid-template-rows: 0fr; opacity: 0; pointer-events: none }
+.ath-inner { min-height: 0; overflow: hidden }
+
+.ath-viewport {
+  margin-top: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  transition: height 360ms var(--ath-ease);
+}
+.ath-viewport::-webkit-scrollbar { display: none }
+.ath-viewport:focus-visible { outline: 2px solid currentColor; outline-offset: 2px }
+.ath-viewport.is-capped {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ath-ft), #000 calc(100% - var(--ath-fb)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--ath-ft), #000 calc(100% - var(--ath-fb)), transparent 100%);
+}
+
+.ath-stream { display: flex; flex-direction: column; gap: calc(var(--ath-lh) * 0.2) }
+
+.ath-line {
+  margin: 0;
+  height: calc(var(--ath-lh) * 2);
+  font-weight: 425;
+  opacity: var(--ath-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: opacity 600ms ease;
+  animation: ath-line-in 460ms var(--ath-ease) backwards;
+}
+/* The newest line is the one being "said": full ink while it is live, then it settles. */
+.ath-line.is-live { opacity: 1 }
+@keyframes ath-line-in {
+  from { opacity: 0; transform: translateY(6px) }
+  to   { opacity: 1; transform: none }
+}
+
+/* Visually hidden live region: announces state changes, never the per-second timer. */
+.ath-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Offscreen or tab hidden: freeze the CSS loops too, not only the JS clock. */
+.ath.is-paused .ath-label.is-shimmer { animation-play-state: paused }
+
+@media (prefers-reduced-motion: reduce) {
+  .ath, .ath-line { animation: none }
+  .ath-label.is-shimmer { animation: none; -webkit-mask-image: none; mask-image: none }
+  .ath-collapsible, .ath-viewport, .ath-chevron, .ath-line { transition: none }
+}
