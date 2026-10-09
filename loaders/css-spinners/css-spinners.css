@@ -1,0 +1,290 @@
+/*!
+ * css-spinners.css - eight pure-CSS loading spinners.
+ *
+ * Upstream: loading.io css spinner, https://loading.io/css/
+ *           source https://github.com/loadingio/css-spinner
+ * Author:   loading.io (zbryikt, Taipei)
+ * Licence:  CC0 1.0 Universal (public domain dedication). Upstream README: "All
+ *           loader files here are released under CC0 License." No permission or
+ *           attribution is required; the author asks only for a thumbs-up link:
+ *           loading.io css spinner ( https://loading.io/css/ ). That link is here.
+ *
+ * Adapted for orb-loaders: eight of the twelve upstream spinners kept and renamed
+ * .lds-<x> -> .cs-<x>; every length derived from one custom property (--cs-size,
+ * default 80px) instead of fixed pixels; colour is currentColor; hard-coded
+ * per-child offsets replaced by a --i index; layout-animating keyframes (ripple,
+ * facebook) moved to inset/transform; linear and mismatched easing replaced by
+ * curves chosen per spinner; prefers-reduced-motion swaps the motion for a slow
+ * opacity pulse. See README.md "Changes from upstream".
+ *
+ * Usage:   <div role="status">
+ *            <div class="cs-ring"><div></div><div></div><div></div><div></div></div>
+ *            <span class="cs-sr">Loading…</span>
+ *          </div>
+ *          colour: set `color` on it or any ancestor.
+ *          size:   style="--cs-size: 24px"   (default 80px)
+ */
+
+/* Visually-hidden text for the role="status" wrapper: read by screen readers, never seen. */
+.cs-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------------ shared */
+
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+    .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid) {
+  --_s: var(--cs-size, 80px);
+  --_u: calc(var(--_s) / 80);          /* one upstream pixel */
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  flex: none;
+  width: var(--_s);
+  height: var(--_s);
+}
+
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+    .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid),
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+    .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid) > div,
+:is(.cs-spinner, .cs-default, .cs-roller) > div::after {
+  box-sizing: border-box;
+}
+
+/* Child index, 0-based, for the spinners that lay children out by angle or delay. */
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller) > :nth-child(1)  { --i: 0 }
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller) > :nth-child(2)  { --i: 1 }
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller) > :nth-child(3)  { --i: 2 }
+:is(.cs-spinner, .cs-default, .cs-ring, .cs-roller) > :nth-child(4)  { --i: 3 }
+:is(.cs-spinner, .cs-default, .cs-roller) > :nth-child(5)  { --i: 4 }
+:is(.cs-spinner, .cs-default, .cs-roller) > :nth-child(6)  { --i: 5 }
+:is(.cs-spinner, .cs-default, .cs-roller) > :nth-child(7)  { --i: 6 }
+:is(.cs-spinner, .cs-default, .cs-roller) > :nth-child(8)  { --i: 7 }
+:is(.cs-spinner, .cs-default) > :nth-child(9)  { --i: 8 }
+:is(.cs-spinner, .cs-default) > :nth-child(10) { --i: 9 }
+:is(.cs-spinner, .cs-default) > :nth-child(11) { --i: 10 }
+:is(.cs-spinner, .cs-default) > :nth-child(12) { --i: 11 }
+
+/* ----------------------------------------------------------------- spinner */
+/* Twelve bars, a bright head and a fading tail. 12 children. */
+
+.cs-spinner > div {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--i) * 30deg));
+  opacity: calc(1 - var(--i) * .07); /* the rest pose, also the reduced-motion frame */
+  animation: cs-spinner 1.2s cubic-bezier(.25, .5, .6, 1) infinite;
+  animation-delay: calc((var(--i) - 11) * .1s);
+}
+.cs-spinner > div::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--_u) * 3.2);
+  left: calc(var(--_u) * 36.8);
+  width: max(1.25px, calc(var(--_u) * 6.4));
+  height: calc(var(--_u) * 17.6);
+  margin-left: calc(var(--_u) * 3.2 - max(.625px, calc(var(--_u) * 3.2)));
+  border-radius: calc(var(--_u) * 3.2);
+  background: currentColor;
+}
+
+@keyframes cs-spinner {
+  0%   { opacity: 1 }
+  100% { opacity: .12 } /* not 0: the ring stays legible against the page */
+}
+
+/* ----------------------------------------------------------------- default */
+/* Twelve dots on a circle; a swell travels round. 12 children. */
+
+.cs-default > div {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--i) * 30deg));
+}
+.cs-default > div::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--_u) * 7.36);
+  left: calc(var(--_u) * 36.8);
+  width: max(1.5px, calc(var(--_u) * 6.4));  /* floor keeps the dots visible at 16px */
+  height: max(1.5px, calc(var(--_u) * 6.4));
+  margin-left: calc(var(--_u) * 3.2 - max(.75px, calc(var(--_u) * 3.2)));
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .7;
+  animation: cs-default 1.2s ease-in-out infinite;
+  animation-delay: calc((var(--i) - 11) * .1s);
+}
+
+@keyframes cs-default {
+  0%, 25%, 75%, 100% { transform: scale(1);   opacity: .7 }
+  50%                { transform: scale(1.6); opacity: 1 }
+}
+
+/* -------------------------------------------------------------------- ring */
+/* Four quarter-arcs chase each other round the same circle. 4 children. */
+
+.cs-ring > div {
+  position: absolute;
+  inset: calc(var(--_u) * 8);
+  border: max(1px, calc(var(--_u) * 8)) solid currentColor;
+  border-color: currentColor transparent transparent transparent;
+  border-radius: 50%;
+  transform: rotate(calc(var(--i) * 25deg)); /* rest pose: a fanned arc */
+  animation: cs-ring 1.2s cubic-bezier(.5, 0, .5, 1) infinite;
+  animation-delay: calc((var(--i) - 3) * .15s);
+}
+
+@keyframes cs-ring {
+  0%   { transform: rotate(0deg) }
+  100% { transform: rotate(360deg) }
+}
+
+/* ------------------------------------------------------------------ roller */
+/* A fan of eight dots that winds up and releases, each a beat behind. 8 children. */
+
+.cs-roller > div {
+  position: absolute;
+  inset: 0;
+  animation: cs-roller 1.2s cubic-bezier(.5, 0, .5, 1) infinite;
+  animation-delay: calc((var(--i) + 1) * -.036s);
+}
+.cs-roller > div::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(1.5px, calc(var(--_u) * 7.2));
+  height: max(1.5px, calc(var(--_u) * 7.2));
+  margin: calc(max(1.5px, calc(var(--_u) * 7.2)) / -2) 0 0 calc(max(1.5px, calc(var(--_u) * 7.2)) / -2);
+  border-radius: 50%;
+  background: currentColor;
+  transform: rotate(calc(45deg + var(--i) * 18deg)) translateX(calc(var(--_u) * 32));
+}
+
+@keyframes cs-roller {
+  0%   { transform: rotate(0deg) }
+  100% { transform: rotate(360deg) }
+}
+
+/* ------------------------------------------------------------------ ripple */
+/* Two rings spread out and fade. 2 children. */
+
+.cs-ripple > div {
+  position: absolute;
+  inset: 0;
+  border: max(1px, calc(var(--_u) * 4)) solid currentColor;
+  border-radius: 50%;
+  opacity: .5; /* rest pose */
+  animation: cs-ripple 1.4s cubic-bezier(0, .2, .8, 1) infinite;
+}
+.cs-ripple > div:nth-child(2) { inset: 30%; opacity: .9; animation-delay: -.7s }
+
+@keyframes cs-ripple {
+  0%   { inset: 45%; opacity: 0 }
+  8%   { opacity: 1 }
+  100% { inset: 0;   opacity: 0 }
+}
+
+/* ---------------------------------------------------------------- facebook */
+/* Three bars breathe in turn. scaleY instead of animating top and height. 3 children. */
+
+.cs-facebook > div {
+  position: absolute;
+  top: calc(var(--_u) * 8);
+  width: calc(var(--_u) * 16);
+  height: calc(var(--_u) * 64);
+  background: currentColor;
+  animation: cs-facebook 1.2s ease-in-out infinite;
+}
+.cs-facebook > div:nth-child(1) { left: calc(var(--_u) * 8);  animation-delay: -.24s }
+.cs-facebook > div:nth-child(2) { left: calc(var(--_u) * 32); animation-delay: -.12s }
+.cs-facebook > div:nth-child(3) { left: calc(var(--_u) * 56) }
+
+@keyframes cs-facebook {
+  0%, 100% { transform: scaleY(1) }
+  50%      { transform: scaleY(.45) }
+}
+
+/* ---------------------------------------------------------------- ellipsis */
+/* Dots shuffle left and a new one grows in. 4 children. */
+
+.cs-ellipsis > div {
+  position: absolute;
+  top: calc(var(--_u) * 33.333);
+  width: calc(var(--_u) * 13.333);
+  height: calc(var(--_u) * 13.333);
+  border-radius: 50%;
+  background: currentColor;
+}
+.cs-ellipsis > div:nth-child(1) { left: calc(var(--_u) * 8);  animation: cs-ellipsis-in   .7s cubic-bezier(.65, 0, .35, 1) infinite }
+.cs-ellipsis > div:nth-child(2) { left: calc(var(--_u) * 8);  animation: cs-ellipsis-move .7s cubic-bezier(.65, 0, .35, 1) infinite }
+.cs-ellipsis > div:nth-child(3) { left: calc(var(--_u) * 32); animation: cs-ellipsis-move .7s cubic-bezier(.65, 0, .35, 1) infinite }
+.cs-ellipsis > div:nth-child(4) { left: calc(var(--_u) * 56); animation: cs-ellipsis-out  .7s cubic-bezier(.65, 0, .35, 1) infinite }
+
+@keyframes cs-ellipsis-in   { from { transform: scale(0) } to { transform: scale(1) } }
+@keyframes cs-ellipsis-out  { from { transform: scale(1) } to { transform: scale(0) } }
+@keyframes cs-ellipsis-move { from { transform: translateX(0) } to { transform: translateX(calc(var(--_u) * 24)) } }
+
+/* -------------------------------------------------------------------- grid */
+/* Nine dots dim and shrink in a diagonal wave. 9 children. */
+
+.cs-grid > div {
+  position: absolute;
+  top: calc(var(--_u) * (8 + var(--r) * 24));
+  left: calc(var(--_u) * (8 + var(--c) * 24));
+  width: calc(var(--_u) * 16);
+  height: calc(var(--_u) * 16);
+  border-radius: 50%;
+  background: currentColor;
+  animation: cs-grid 1.2s ease-in-out infinite;
+  animation-delay: calc((var(--r) + var(--c)) * -.16s);
+}
+.cs-grid > :nth-child(1) { --r: 0; --c: 0 }
+.cs-grid > :nth-child(2) { --r: 0; --c: 1 }
+.cs-grid > :nth-child(3) { --r: 0; --c: 2 }
+.cs-grid > :nth-child(4) { --r: 1; --c: 0 }
+.cs-grid > :nth-child(5) { --r: 1; --c: 1 }
+.cs-grid > :nth-child(6) { --r: 1; --c: 2 }
+.cs-grid > :nth-child(7) { --r: 2; --c: 0 }
+.cs-grid > :nth-child(8) { --r: 2; --c: 1 }
+.cs-grid > :nth-child(9) { --r: 2; --c: 2 }
+
+@keyframes cs-grid {
+  0%, 100% { opacity: 1;   transform: scale(1) }
+  50%      { opacity: .25; transform: scale(.65) }
+}
+
+/* ---------------------------------------------------------- reduced motion */
+/* Children stop; each spinner holds its rest pose and breathes in opacity,
+   slowly. !important on the duration survives the common "kill all animation"
+   reset (`* { animation-duration: .001ms !important }`), which would otherwise
+   turn this into a flicker. */
+
+@keyframes cs-calm {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: .4 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+      .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid) {
+    animation: cs-calm 2.4s ease-in-out infinite;
+    animation-duration: 2.4s !important;
+  }
+  :is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+      .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid) > div,
+  :is(.cs-spinner, .cs-default, .cs-ring, .cs-roller,
+      .cs-ripple, .cs-facebook, .cs-ellipsis, .cs-grid) > div::after {
+    animation: none !important;
+  }
+}

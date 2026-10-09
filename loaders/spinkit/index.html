@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SpinKit - eight CSS spinners</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="../../assets/glass.css" />
+<link rel="stylesheet" href="spinkit.css" />
+<script src="../../assets/theme.js"></script>
+<style>
+  /* Page layout only. Tokens, surfaces, header and controls come from glass.css. */
+
+  main{padding:26px 32px 90px; max-width:1160px; margin:0 auto}
+  section{margin-bottom:40px}
+  h2{
+    font-size:11px; font-weight:600; letter-spacing:.10em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px; max-width:78ch}
+  .sub strong{color:var(--ink); font-weight:650}
+  .card{padding:22px}
+
+  /* The loaders read currentColor, so the demo colours them by setting `color`. */
+  main{--demo-ink:var(--accent-ink)}
+  main[data-ink="ink"]{--demo-ink:var(--ink)}
+  main[data-ink="muted"]{--demo-ink:var(--muted)}
+  .stage, .cell .host, .inline-demo .host, .rec-host{color:var(--demo-ink)}
+
+  .controls{
+    display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center;
+    padding:12px 16px; margin-bottom:22px;
+  }
+  .ctl{display:flex; align-items:center; gap:9px; font-size:11.5px; font-weight:600}
+  .ctl label{
+    color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    font-size:10.5px;
+  }
+  .val{font-variant-numeric:tabular-nums; min-width:44px; color:var(--muted)}
+
+  /* ---- variants ---- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(212px,1fr)); gap:14px}
+  .variant{padding:10px; display:flex; flex-direction:column}
+  .variant .stage{
+    display:flex; align-items:center; justify-content:center;
+    min-height:150px; padding:16px;
+  }
+  .variant .meta{padding:13px 8px 7px}
+  .variant .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
+  .variant .name em{font-style:normal; color:var(--accent-ink); font-weight:600; font-size:11px}
+  .variant .desc{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.45}
+  .variant .cls{
+    font-size:10px; color:var(--muted); margin-top:10px; padding-top:10px;
+    border-top:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+
+  /* ---- size ladder ---- */
+  .ladder{display:flex; flex-wrap:wrap; gap:14px}
+  .ladder .cell{
+    flex:1 1 118px; padding:20px 10px 14px;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+  .cell .host{display:flex; align-items:center; justify-content:center; min-height:100px}
+  .cell .cap{
+    font-size:10.5px; font-weight:600; color:var(--muted); letter-spacing:.07em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+
+  /* ---- in context ---- */
+  .context{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+  .context .card{display:flex; flex-direction:column; gap:14px; align-items:flex-start}
+  .context h3{font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+  .btn-load{display:inline-flex; align-items:center; gap:10px}
+  .inline-demo{display:flex; align-items:center; gap:12px; font-size:13.5px; color:var(--muted)}
+  .panel-demo{
+    width:100%; min-height:132px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px;
+    font-size:12.5px; color:var(--muted);
+  }
+
+  table.rec{width:100%; border-collapse:collapse; font-size:12.5px}
+  table.rec th{
+    text-align:left; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:0 12px 9px 0; border-bottom:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:600;
+  }
+  table.rec td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line); vertical-align:middle}
+  table.rec tr:last-child td{border-bottom:0}
+  table.rec td.st{font-weight:650; white-space:nowrap}
+  table.rec td.st .rec-host{display:inline-flex; vertical-align:middle; margin-right:10px; width:32px; justify-content:center}
+
+  .snippet-head{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  #copy-status{font-size:11px; color:var(--muted)}
+  ul.notes{margin:14px 0 0 18px; font-size:12.5px; color:var(--muted)}
+  ul.notes li{margin-bottom:5px}
+  ul.notes strong{color:var(--ink); font-weight:650}
+
+  /* glass.css clamps every animation to .001ms under reduced motion, which
+     would turn the calm opacity breathing into a flicker. Re-assert the 3s
+     breathing for the spinner roots only; nothing else on the page animates. */
+  @media (prefers-reduced-motion: reduce){
+    .sk-chase,.sk-bounce,.sk-wave,.sk-flow,.sk-swing,.sk-circle-fade,.sk-grid,.sk-fold{
+      animation-duration:3s !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <div>
+      <a class="back" href="../../index.html">&larr; Orb Loaders catalogue</a>
+      <h1>SpinKit <span>- eight CSS spinners</span></h1>
+      <p>A hand-picked, retuned subset of <a href="https://github.com/tobiasahlin/SpinKit">SpinKit</a> by
+         Tobias Ahlin. Pure CSS, no JavaScript, no dependencies. Colour follows <code>currentColor</code>,
+         size follows <code>--sk-size</code>. Variant choice cross-checked against
+         <a href="https://github.com/ybq/Android-SpinKit">Android-SpinKit</a> by ybq. Both MIT.</p>
+    </div>
+    <button class="theme-toggle" type="button">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      </svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+      <span>Theme</span>
+    </button>
+  </div>
+</header>
+
+<main data-ink="accent">
+
+  <div class="controls glass">
+    <div class="ctl">
+      <label>Colour</label>
+      <div class="seg" id="seg-ink">
+        <button data-v="accent" aria-pressed="true">Accent</button>
+        <button data-v="ink" aria-pressed="false">Ink</button>
+        <button data-v="muted" aria-pressed="false">Muted</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label for="size">Size</label>
+      <input type="range" id="size" min="16" max="96" step="4" value="56" />
+      <span class="val" id="size-val">56 px</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>1 &middot; The eight</h2>
+    <p class="sub">Chosen for range: a ring, a wave, a pulse, a grid, a fold. Dropped from upstream: plane
+       (a flat flipping square), pulse and circle (near-duplicates of bounce and circle-fade), and wander.
+       Use the size slider to see how each holds up small.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section>
+    <h2>2 &middot; One variant, every size</h2>
+    <p class="sub">Dots and bars have a minimum pixel size, so at 16 to 24&nbsp;px they stay legible
+       instead of dissolving into sub-pixel smudges.</p>
+    <div class="controls glass" style="margin-bottom:14px">
+      <div class="ctl"><label>Variant</label><div class="seg" id="seg-ladder"></div></div>
+    </div>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <section>
+    <h2>3 &middot; In context</h2>
+    <p class="sub">The same markup, three jobs. The button spinner is white because it inherits the
+       button's text colour, with no extra rule.</p>
+    <div class="context">
+      <div class="card glass">
+        <h3>Inside a button</h3>
+        <button class="btn btn-load" type="button" aria-busy="true">
+          <span class="sk-circle-fade" style="--sk-size:16px" aria-hidden="true"><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i><i class="sk-circle-fade-dot"></i></span>
+          Saving&hellip;
+        </button>
+        <button class="btn ghost btn-load" type="button" aria-busy="true">
+          <span class="sk-chase" style="--sk-size:16px" aria-hidden="true"><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i></span>
+          Syncing&hellip;
+        </button>
+      </div>
+      <div class="card glass">
+        <h3>Beside a line of text</h3>
+        <div class="inline-demo" role="status">
+          <span class="host"><span class="sk-flow" style="--sk-size:24px" aria-hidden="true"><i class="sk-flow-dot"></i><i class="sk-flow-dot"></i><i class="sk-flow-dot"></i></span></span>
+          <span>Fetching results&hellip;</span>
+        </div>
+        <div class="inline-demo" role="status">
+          <span class="host"><span class="sk-wave" style="--sk-size:20px" aria-hidden="true"><i class="sk-wave-rect"></i><i class="sk-wave-rect"></i><i class="sk-wave-rect"></i><i class="sk-wave-rect"></i><i class="sk-wave-rect"></i></span></span>
+          <span>Transcribing audio&hellip;</span>
+        </div>
+      </div>
+      <div class="card glass">
+        <h3>Whole panel</h3>
+        <div class="panel-demo well" role="status">
+          <span class="host" style="color:var(--demo-ink)"><span class="sk-grid" style="--sk-size:48px" aria-hidden="true"><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i><i class="sk-grid-cube"></i></span></span>
+          <span>Loading your library&hellip;</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 &middot; Which one goes where</h2>
+    <p class="sub">A starting point, not a rule.</p>
+    <div class="card glass">
+      <table class="rec" id="rec">
+        <thead><tr><th>Variant</th><th>Use it for</th><th>Why</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>5 &middot; Dropping it into a page</h2>
+    <p class="sub">One stylesheet. No script, no build step.</p>
+    <div class="card glass">
+      <div class="snippet-head">
+        <span class="sub" style="margin:0">Pick a variant above to see its markup here.</span>
+        <span><span id="copy-status" role="status"></span> <button class="btn ghost" id="copy" type="button">Copy</button></span>
+      </div>
+<pre id="snippet"></pre>
+      <ul class="notes">
+        <li><strong>Cost:</strong> 13&nbsp;KB as authored including the licence header; only <code>transform</code> and <code>opacity</code> animate. Zero requests.</li>
+        <li><strong>Accessibility:</strong> wrap the spinner in <code>role="status"</code> with a visually-hidden <code>sk-sr</code> span ("Loading&hellip;") when it is the only signal; mark it <code>aria-hidden="true"</code> when text already says "Loading". Keep a persistent status region on the page, or set <code>aria-busy="true"</code> on the region being loaded, and insert the spinner before the text.</li>
+        <li><strong>Reduced motion:</strong> <code>prefers-reduced-motion: reduce</code> swaps the motion for a static composition that breathes in opacity over 3&nbsp;s.</li>
+        <li><strong>Licence:</strong> upstream is MIT. Attribution is in the file header.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var VARIANTS = [
+    { id: 'chase',       root: 'sk-chase',       part: 'sk-chase-dot',       n: 6,  label: 'Chasing dots',
+      desc: 'Six dots race round and shrink as they go.',
+      use: 'Page or panel loads', why: 'The default. Directional, so it reads as progress rather than idle.' },
+    { id: 'bounce',      root: 'sk-bounce',      part: 'sk-bounce-dot',      n: 2,  label: 'Double bounce',
+      desc: 'Two discs swell and fade in turn.',
+      use: 'Calm full-screen waits', why: 'Slow and soft. No hard edges to tire the eye.' },
+    { id: 'wave',        root: 'sk-wave',        part: 'sk-wave-rect',       n: 5,  label: 'Wave',
+      desc: 'Five bars ripple left to right.',
+      use: 'Audio, streaming, uploads', why: 'The bars read as signal or data moving.' },
+    { id: 'flow',        root: 'sk-flow',        part: 'sk-flow-dot',        n: 3,  label: 'Flow',
+      desc: 'Three dots swell in sequence.',
+      use: 'Inline with text, chat typing', why: 'A wide, short shape that fits on a line.' },
+    { id: 'swing',       root: 'sk-swing',       part: 'sk-swing-dot',       n: 2,  label: 'Swing',
+      desc: 'Two dots pulse on a rotating axis.',
+      use: 'Compact async work', why: 'Only two shapes, so it stays clean at 20 px.' },
+    { id: 'circle-fade', root: 'sk-circle-fade', part: 'sk-circle-fade-dot', n: 12, label: 'Circle fade',
+      desc: 'A bright head with a fading tail circles a dim ring.',
+      use: 'Buttons and small inline slots', why: 'The most familiar spinner shape, readable at 16 px.' },
+    { id: 'grid',        root: 'sk-grid',        part: 'sk-grid-cube',       n: 9,  label: 'Grid',
+      desc: 'Nine cubes collapse in a diagonal wave.',
+      use: 'Dashboards, content grids', why: 'Echoes a card layout while it fills.' },
+    { id: 'fold',        root: 'sk-fold',        part: 'sk-fold-cube',       n: 4,  label: 'Folding cube',
+      desc: 'Four tiles fold in, hold, and flip away.',
+      use: 'Hero moments, 64 px and up', why: 'The most theatrical. Wasted below 40 px.' }
+  ];
+
+  var LADDER_SIZES = [96, 64, 48, 32, 24, 20, 16];
+  var state = { size: 56, ladder: 'chase', pick: 'chase' };
+
+  function build(v, size, role) {
+    var el = document.createElement('div');
+    el.className = v.root;
+    el.style.setProperty('--sk-size', size + 'px');
+    el.setAttribute('role', role);
+    el.setAttribute('aria-label', v.label + ' loading indicator');
+    for (var i = 0; i < v.n; i++) {
+      var p = document.createElement('div');
+      p.className = v.part;
+      el.appendChild(p);
+    }
+    return el;
+  }
+
+  function find(id) { return VARIANTS.filter(function (v) { return v.id === id; })[0]; }
+
+  /* ---- the eight ---- */
+  var grid = document.getElementById('grid');
+  VARIANTS.forEach(function (v) {
+    var card = document.createElement('div');
+    card.className = 'variant glass';
+    card.innerHTML =
+      '<div class="stage well"></div>' +
+      '<div class="meta">' +
+        '<div class="name">' + v.id + ' <em>&middot; ' + v.label + '</em></div>' +
+        '<div class="desc">' + v.desc + '</div>' +
+        '<div class="cls">.' + v.root + ' &times; ' + v.n + '</div>' +
+      '</div>';
+    card.querySelector('.stage').setAttribute('data-id', v.id);
+    card.addEventListener('click', function () { setPick(v.id); });
+    grid.appendChild(card);
+  });
+
+  function renderGrid() {
+    Array.prototype.forEach.call(grid.querySelectorAll('.stage'), function (stage) {
+      stage.innerHTML = '';
+      stage.appendChild(build(find(stage.getAttribute('data-id')), state.size, 'img'));
+    });
+  }
+
+  /* ---- ladder ---- */
+  var ladderSeg = document.getElementById('seg-ladder');
+  VARIANTS.forEach(function (v) {
+    var b = document.createElement('button');
+    b.dataset.v = v.id;
+    b.textContent = v.id;
+    b.setAttribute('aria-pressed', String(v.id === state.ladder));
+    ladderSeg.appendChild(b);
+  });
+
+  var ladder = document.getElementById('ladder');
+  function renderLadder() {
+    ladder.innerHTML = '';
+    var v = find(state.ladder);
+    LADDER_SIZES.forEach(function (sz) {
+      var cell = document.createElement('div');
+      cell.className = 'cell glass';
+      var host = document.createElement('div');
+      host.className = 'host';
+      host.appendChild(build(v, sz, 'img'));
+      var cap = document.createElement('div');
+      cap.className = 'cap';
+      cap.textContent = sz + ' px';
+      cell.appendChild(host);
+      cell.appendChild(cap);
+      ladder.appendChild(cell);
+    });
+  }
+
+  /* ---- recommendation table ---- */
+  var recBody = document.querySelector('#rec tbody');
+  VARIANTS.forEach(function (v) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.className = 'st';
+    var host = document.createElement('span');
+    host.className = 'rec-host';
+    host.appendChild(build(v, 24, 'img'));
+    td.appendChild(host);
+    td.appendChild(document.createTextNode(v.id));
+    tr.appendChild(td);
+    [v.use, v.why].forEach(function (t) {
+      var c = document.createElement('td');
+      c.textContent = t;
+      tr.appendChild(c);
+    });
+    recBody.appendChild(tr);
+  });
+
+  /* ---- snippet ---- */
+  var snippet = document.getElementById('snippet');
+  function renderSnippet() {
+    var v = find(state.pick);
+    var parts = '';
+    for (var i = 0; i < v.n; i++) parts += '    <div class="' + v.part + '"></div>\n';
+    var text =
+      '<!-- 1. load the stylesheet -->\n' +
+      '<link rel="stylesheet" href="spinkit.css">\n\n' +
+      '<!-- 2. drop in the markup: ' + v.label + ' -->\n' +
+      '<div role="status">\n' +
+      '  <div class="' + v.root + '" style="--sk-size: 48px; color: #6d28d9">\n' +
+      parts +
+      '  </div>\n' +
+      '  <span class="sk-sr">Loading\u2026</span>\n' +
+      '</div>';
+    snippet.textContent = text;
+  }
+
+  function setPick(id) {
+    state.pick = id;
+    renderSnippet();
+    document.getElementById('copy-status').textContent = 'Showing ' + id;
+  }
+
+  document.getElementById('copy').addEventListener('click', function () {
+    var status = document.getElementById('copy-status');
+    if (!navigator.clipboard) { status.textContent = 'Select the text and copy it'; return; }
+    navigator.clipboard.writeText(snippet.textContent).then(
+      function () { status.textContent = 'Copied'; },
+      function () { status.textContent = 'Copy blocked here - select the text instead'; }
+    );
+  });
+
+  /* ---- controls ---- */
+  function segment(id, apply) {
+    var root = document.getElementById(id);
+    root.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      apply(btn.dataset.v);
+    });
+  }
+
+  segment('seg-ink', function (v) { document.querySelector('main').setAttribute('data-ink', v); });
+  segment('seg-ladder', function (v) { state.ladder = v; renderLadder(); });
+
+  var size = document.getElementById('size');
+  var sizeVal = document.getElementById('size-val');
+  size.addEventListener('input', function () {
+    state.size = Number(size.value);
+    sizeVal.textContent = state.size + ' px';
+    renderGrid();
+  });
+
+  renderGrid();
+  renderLadder();
+  renderSnippet();
+})();
+</script>
+</body>
+</html>

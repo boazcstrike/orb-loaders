@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CSS Spinners - eight pure-CSS loading spinners</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="../../assets/glass.css" />
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="css-spinners.css" />
+<style>
+  /* Page layout only. Tokens, surfaces, header and buttons come from glass.css. */
+
+  main{padding:26px 32px 90px; max-width:1160px; margin:0 auto}
+  section{margin-bottom:40px}
+  h2{
+    font-size:11px; font-weight:600; letter-spacing:.10em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px; max-width:78ch}
+  .card{padding:22px}
+
+  /* ---- colour switch: radios + :has(), no script ---- */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center;
+    padding:12px 16px; margin-bottom:22px;
+  }
+  .ctl{display:flex; align-items:center; gap:9px}
+  .ctl > span{
+    color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    font-size:10.5px;
+  }
+  .seg label{
+    font-size:11.5px; font-weight:600; padding:7px 13px; cursor:pointer;
+    color:var(--muted); transition:color .15s ease, background-color .15s ease;
+  }
+  .seg label + label{border-left:1px solid var(--line)}
+  .seg label:hover{color:var(--ink)}
+  .seg input{position:absolute; opacity:0; pointer-events:none}
+  .seg label:has(input:checked){background:var(--accent-fill); color:#fff}
+  .seg label:has(input:focus-visible){outline:2px solid var(--accent); outline-offset:-2px}
+
+  /* the three colour choices; the spinners only ever read currentColor */
+  main{--ink-loader:var(--accent)}
+  main:has(#c-ink:checked){--ink-loader:var(--ink)}
+  main:has(#c-muted:checked){--ink-loader:var(--muted)}
+  .stage, .host, .inline{color:var(--ink-loader)}
+
+  /* ---- variant cards ---- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px}
+  .variant{padding:10px; display:flex; flex-direction:column}
+  .stage{
+    display:flex; align-items:center; justify-content:center;
+    min-height:150px; padding:16px; --cs-size:64px;
+  }
+  .stage > [role="status"]{display:flex}
+  .meta{padding:13px 8px 7px; display:flex; flex-direction:column; flex:1}
+  .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
+  .name em{font-style:normal; color:var(--accent-ink); font-weight:600; font-size:11px}
+  .desc{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.45}
+  .aria{
+    font-size:10.5px; color:var(--muted); margin-top:10px; padding-top:10px;
+    border-top:1px solid var(--line); flex:1;
+  }
+  .aria code{color:var(--ink)}
+  .aria b{color:var(--ink); font-weight:600}
+  .copyrow{display:flex; align-items:center; gap:8px; margin-top:10px}
+  .copyrow code{
+    flex:1; min-width:0; font-size:10.5px; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .copy{
+    appearance:none; flex:none; font:inherit; font-size:10.5px; font-weight:600;
+    padding:5px 10px; border-radius:8px; cursor:pointer;
+    color:var(--ink); background:transparent; border:1px solid var(--line-strong);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .copy:hover{border-color:var(--accent); color:var(--accent-ink)}
+
+  /* ---- size matrix ---- */
+  table.sizes{width:100%; border-collapse:collapse; font-size:12.5px}
+  table.sizes th{
+    text-align:left; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:0 12px 9px 0; border-bottom:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:600;
+  }
+  table.sizes th:not(:first-child){width:19%}
+  table.sizes td{padding:12px 12px 12px 0; border-bottom:1px solid var(--line); vertical-align:middle}
+  table.sizes tr:last-child td{border-bottom:0}
+  table.sizes td:first-child{font-weight:650; white-space:nowrap}
+  .host{display:flex; align-items:center; min-height:64px}
+
+  /* ---- in context ---- */
+  .ctx{display:flex; flex-wrap:wrap; gap:24px 40px; align-items:center}
+  .btn .inline{color:inherit}
+  .line{font-size:13.5px; color:var(--muted); display:flex; align-items:center; gap:10px}
+  .btn[disabled]{display:inline-flex; align-items:center; gap:9px; cursor:progress}
+  .panel{display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:12px;
+    background:var(--surface-2); border:1px solid var(--line); font-size:13px}
+  .panel small{display:block; color:var(--muted); font-size:11.5px}
+
+  ul.notes{margin:14px 0 0 18px; font-size:12.5px; color:var(--muted)}
+  ul.notes li{margin-bottom:5px}
+  ul.notes strong{color:var(--ink); font-weight:650}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <div>
+      <a class="back" href="../../index.html">&larr; Orb Loaders catalogue</a>
+      <h1>CSS Spinners <span>- eight pure-CSS spinners</span></h1>
+      <p>Picked from <a href="https://loading.io/css/">loading.io css spinner</a> (CC0). Plain markup, plain CSS,
+         no script. Colour is <code>currentColor</code>; every length comes from one property,
+         <code>--cs-size</code>.</p>
+    </div>
+    <button class="theme-toggle" type="button">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      </svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+      <span>Theme</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="controls glass">
+    <div class="ctl">
+      <span>Colour</span>
+      <div class="seg" role="radiogroup" aria-label="Spinner colour">
+        <label><input type="radio" name="colour" id="c-accent" checked />Accent</label>
+        <label><input type="radio" name="colour" id="c-ink" />Ink</label>
+        <label><input type="radio" name="colour" id="c-muted" />Muted</label>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>1 &middot; The eight</h2>
+    <p class="sub">All shown at <code>--cs-size: 64px</code>. Of upstream's twelve, <em>dual-ring</em> (a near-twin of
+       <em>ring</em>), <em>circle</em>, <em>heart</em> and <em>hourglass</em> (novelty shapes) are left out.</p>
+    <div class="grid">
+
+      <article class="variant glass">
+        <div class="stage well"><div role="status"><div class="cs-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
+        <div class="meta">
+          <div class="name">spinner <em>&middot; .cs-spinner</em></div>
+          <div class="desc">Twelve bars with a bright head and a fading tail. The familiar system spinner.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text for a page or panel wait. 12 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-spinner&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div role="status"><div class="cs-default"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
+        <div class="meta">
+          <div class="name">default <em>&middot; .cs-default</em></div>
+          <div class="desc">Twelve dots on a circle; a swell of size and brightness travels round.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 12 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-default&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div class="cs-ring" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div>
+        <div class="meta">
+          <div class="name">ring <em>&middot; .cs-ring</em></div>
+          <div class="desc">Four arcs chase each other round one circle on a soft in-out curve.</div>
+          <div class="aria"><b>Pattern:</b> <code>aria-hidden="true"</code> inside a button that keeps visible text and <code>aria-busy="true"</code>. 4 children.</div>
+          <div class="copyrow"><code>&lt;div class=&quot;cs-ring&quot; aria-hidden=&quot;true&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div role="status"><div class="cs-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
+        <div class="meta">
+          <div class="name">roller <em>&middot; .cs-roller</em></div>
+          <div class="desc">A fan of eight dots winds up and releases, each a beat behind the last.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 8 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-roller&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div class="cs-ripple" role="img" aria-label="Searching"><div></div><div></div></div></div>
+        <div class="meta">
+          <div class="name">ripple <em>&middot; .cs-ripple</em></div>
+          <div class="desc">Two rings spread out and fade, like a sonar ping or a drop in water.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="img"</code> + a specific label such as "Searching nearby". 2 children.</div>
+          <div class="copyrow"><code>&lt;div class=&quot;cs-ripple&quot; role=&quot;img&quot; aria-label=&quot;Searching&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div class="cs-facebook" role="progressbar" aria-label="Loading"><div></div><div></div><div></div></div></div>
+        <div class="meta">
+          <div class="name">facebook <em>&middot; .cs-facebook</em></div>
+          <div class="desc">Three bars breathe in turn. Compact, and it reads at a glance.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="progressbar"</code> with no value: an indeterminate bar. 3 children.</div>
+          <div class="copyrow"><code>&lt;div class=&quot;cs-facebook&quot; role=&quot;progressbar&quot; aria-label=&quot;Loading&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div role="status"><div class="cs-ellipsis"><div></div><div></div><div></div><div></div></div><span class="cs-sr">Sending…</span></div></div>
+        <div class="meta">
+          <div class="name">ellipsis <em>&middot; .cs-ellipsis</em></div>
+          <div class="desc">Dots shuffle left while a new one grows in. Suits a short send or save.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden verb text. 4 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-ellipsis&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Sending…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+      <article class="variant glass">
+        <div class="stage well"><div role="status"><div class="cs-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><span class="cs-sr">Loading…</span></div></div>
+        <div class="meta">
+          <div class="name">grid <em>&middot; .cs-grid</em></div>
+          <div class="desc">Nine dots dim and shrink in a diagonal wave.</div>
+          <div class="aria"><b>Pattern:</b> <code>role="status"</code> + visually-hidden text. 9 children.</div>
+          <div class="copyrow"><code>&lt;div role=&quot;status&quot;&gt;&lt;div class=&quot;cs-grid&quot;&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;cs-sr&quot;&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>2 &middot; One property, every size</h2>
+    <p class="sub"><code>--cs-size</code> sets the square the spinner fits in; bars, dots and borders all scale from it.
+       16&nbsp;px sits in a button or a line of text, 24&nbsp;px in a toolbar, 64&nbsp;px as a panel loader.</p>
+    <div class="card glass">
+      <table class="sizes">
+        <thead><tr><th>Variant</th><th>16 px</th><th>24 px</th><th>40 px</th><th>64 px</th></tr></thead>
+        <tbody>
+          <tr><td>spinner</td><td><div class="host"><div class="cs-spinner" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-spinner" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-spinner" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-spinner" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>default</td><td><div class="host"><div class="cs-default" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-default" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-default" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-default" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>ring</td><td><div class="host"><div class="cs-ring" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ring" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ring" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ring" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>roller</td><td><div class="host"><div class="cs-roller" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-roller" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-roller" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-roller" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>ripple</td><td><div class="host"><div class="cs-ripple" style="--cs-size:16px" aria-hidden="true"><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ripple" style="--cs-size:24px" aria-hidden="true"><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ripple" style="--cs-size:40px" aria-hidden="true"><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ripple" style="--cs-size:64px" aria-hidden="true"><div></div><div></div></div></div></td></tr>
+          <tr><td>facebook</td><td><div class="host"><div class="cs-facebook" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-facebook" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-facebook" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-facebook" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>ellipsis</td><td><div class="host"><div class="cs-ellipsis" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ellipsis" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ellipsis" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-ellipsis" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div></div></div></td></tr>
+          <tr><td>grid</td><td><div class="host"><div class="cs-grid" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-grid" style="--cs-size:24px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-grid" style="--cs-size:40px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td><td><div class="host"><div class="cs-grid" style="--cs-size:64px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 &middot; In context</h2>
+    <p class="sub">Inline beside text, inside a disabled button, and in a loading panel. A spinner next to visible
+       words is decorative and hidden from assistive tech; the busy state lives on the button.</p>
+    <div class="card glass">
+      <div class="ctx">
+        <div class="line"><span class="inline cs-spinner" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></span><span>Syncing your notes</span></div>
+        <button class="btn" type="button" disabled aria-busy="true"><span class="inline cs-ring" style="--cs-size:16px" aria-hidden="true"><div></div><div></div><div></div><div></div></span><span>Saving</span></button>
+        <div class="panel" role="status">
+          <span class="inline cs-ripple" style="--cs-size:40px" aria-hidden="true"><div></div><div></div></span>
+          <span>Searching nearby<small>This can take a few seconds</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 &middot; Dropping it into a page</h2>
+    <p class="sub">One file, no build step, no script.</p>
+    <div class="card glass">
+<pre><span class="c">&lt;!-- 1. load the stylesheet --&gt;</span>
+&lt;link rel="stylesheet" href="css-spinners.css"&gt;
+
+<span class="c">&lt;!-- 2. markup: one root, its children are the spinner parts --&gt;</span>
+&lt;div role="status"&gt;
+  &lt;div class="cs-ring" style="color: var(--accent); --cs-size: 32px"&gt;
+    &lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;span class="cs-sr"&gt;Loading…&lt;/span&gt;
+&lt;/div&gt;
+
+<span class="c">&lt;!-- decorative, beside visible text --&gt;</span>
+&lt;span class="cs-ring" aria-hidden="true" style="--cs-size: 16px"&gt;...&lt;/span&gt; Saving</pre>
+      <div class="copyrow" style="margin-top:12px"><code>&lt;div role="status"&gt;&lt;div class="cs-ring" style="--cs-size: 32px"&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;div&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class="cs-sr"&gt;Loading…&lt;/span&gt;&lt;/div&gt;</code><button class="copy" type="button">Copy</button></div>
+      <ul class="notes">
+        <li><strong>Announcing:</strong> the <code>cs-sr</code> text is visually hidden but read aloud. Keep a persistent
+            <code>role="status"</code> region on the page, or set <code>aria-busy="true"</code> on the region being loaded;
+            insert the spinner first, then the text.</li>
+        <li><strong>Child counts matter:</strong> each spinner needs exactly the number of empty <code>&lt;div&gt;</code>s listed on its card.</li>
+        <li><strong>Reduced motion:</strong> children stop, the spinner holds a rest pose and breathes in opacity, slowly. Turn it on in your OS to see it.</li>
+        <li><strong>Licence:</strong> the loader files are CC0 (public domain). A link back to <a href="https://loading.io/css/">loading.io/css</a> is appreciated, and it is in the file header.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  // Copy buttons only: copies the <code> sitting beside the button.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.copy');
+    if (!btn) return;
+    var text = btn.parentNode.querySelector('code').textContent;
+    var done = function () {
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { btn.textContent = 'Press Ctrl+C'; });
+    } else {
+      btn.textContent = 'Press Ctrl+C';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

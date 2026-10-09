@@ -99,3 +99,15 @@ framework dependency. Geometry is verified identical to the upstream engine for 
 tuned sizes; only the ink ramp differs (grayscale replaced by a chosen palette).
 
 Attribution lives in the header of `thinking-orb.js`. Keep it there.
+
+## Changes from upstream
+
+- **No React.** One vanilla UMD file drawing to canvas 2D, with the upstream geometry constants kept as-is.
+- **Palettes instead of grayscale.** The depth ramp interpolates between a palette's two ink stops, with
+  a light and a dark ramp per palette.
+- **`zoom` option.** Scales the tuned design linearly for hero sizes, where upstream's `(size/300)^0.6`
+  curve goes faint.
+- **Colour lookup table.** Shade and alpha come from a table built once, about 2–3× less main-thread time
+  per frame on a busy page.
+- **Self-pausing and reduced motion.** The loop stops offscreen and in hidden tabs; under
+  `prefers-reduced-motion` the orb paints one static frame.

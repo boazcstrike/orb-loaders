@@ -1,0 +1,295 @@
+/*!
+ * css-loaders.css: eight single-element ring and orb loaders.
+ *
+ * Upstream project : CSS Loaders & Spinners, https://github.com/vineethtrv/css-loader
+ *                    (demo: https://cssloaders.github.io/)
+ * Upstream author  : Vineeth TR (vineethtrv), Kerala, India
+ * Upstream licence : MIT
+ *
+ *   MIT License
+ *
+ *   Copyright (c) 2021 CSS Loaders
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the "Software"), to deal
+ *   in the Software without restriction, including without limitation the rights
+ *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *   copies of the Software, and to permit persons to whom the Software is
+ *   furnished to do so, subject to the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be included in all
+ *   copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *   SOFTWARE.
+ *
+ * Adapted for orb-loaders: eight variants picked from upstream's circle and bubble
+ * sets (circle02, circle03, circle15, bubble02, bubble33, circle20/bubble34,
+ * circle21, circle19). Hardcoded white/orange colours replaced with currentColor;
+ * the fixed 1px size unit replaced with --cl-size; ring thickness now scales with
+ * size and is clamped; track ring, even-speed arc draw via conic mask, a lit-sphere
+ * core, a comet-tailed segment ring, eased timings, negative delays so every
+ * loader starts mid-motion, and a calm reduced-motion fallback. Each loader is
+ * still one element.
+ *
+ * Usage:  <span role="status">
+ *           <span class="cl-arc"></span>
+ *           <span class="cl-sr">Loading…</span>
+ *         </span>
+ * Size :  style="--cl-size: 20px"  (any length; default 48px)
+ * Colour: set `color` on the element or any ancestor; nothing else is hardcoded.
+ */
+
+/* Visually-hidden text for the role="status" wrapper: read by screen readers, never seen. */
+.cl-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+
+.cl-arc, .cl-sweep, .cl-counter, .cl-twin,
+.cl-orbit, .cl-ripple, .cl-segments, .cl-pulse {
+  --_s: var(--cl-size, 48px);
+  /* Ring thickness: 10% of the size, never thinner than 2px, never fatter than 6px. */
+  --_t: clamp(2px, calc(var(--_s) * .1), 6px);
+  --_track: rgba(128, 128, 128, .28);
+  --_soft: rgba(128, 128, 128, .62);
+  --_tail: rgba(128, 128, 128, .12);
+
+  display: inline-block;
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--_s);
+  height: var(--_s);
+  vertical-align: middle;
+  border-radius: 50%;
+}
+
+/* Tints are derived from currentColor, so a loader follows any text colour. */
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .cl-arc, .cl-sweep, .cl-counter, .cl-twin,
+  .cl-orbit, .cl-ripple, .cl-segments, .cl-pulse {
+    --_track: color-mix(in srgb, currentColor 18%, transparent);
+    --_soft: color-mix(in srgb, currentColor 58%, transparent);
+    --_tail: color-mix(in srgb, currentColor 10%, transparent);
+  }
+}
+
+/* Registered so the draw animation can interpolate the arc's start and end angles. */
+@property --cl-s { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --cl-e { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+@keyframes cl-spin { to { transform: rotate(360deg) } }
+@keyframes cl-spin-rev { to { transform: rotate(-360deg) } }
+
+/* ------------------------------------------------------------------- arc
+   Upstream circle01/02: a ring with one coloured quarter. Adds a faint track so
+   the ring reads as a gauge, not a floating hook. */
+.cl-arc {
+  border: var(--_t) solid var(--_track);
+  border-top-color: currentColor;
+  animation: cl-spin .9s linear infinite;
+}
+
+/* ----------------------------------------------------------------- sweep
+   Upstream circle03: a ring that draws itself, then un-draws from its tail.
+   Upstream clips a square polygon, so the arc length is not linear in angle;
+   this masks with a conic gradient so the draw speed is even all the way round. */
+.cl-sweep { animation: cl-spin 1.6s linear infinite }
+.cl-sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--_t) solid currentColor;
+  -webkit-mask-image: conic-gradient(transparent var(--cl-s), #000 var(--cl-s) var(--cl-e), transparent var(--cl-e));
+          mask-image: conic-gradient(transparent var(--cl-s), #000 var(--cl-s) var(--cl-e), transparent var(--cl-e));
+  animation: cl-draw 2.4s cubic-bezier(.65, 0, .35, 1) infinite;
+}
+@keyframes cl-draw {
+  0%   { --cl-s: 0deg;   --cl-e: 4deg }
+  50%  { --cl-s: 0deg;   --cl-e: 360deg }
+  100% { --cl-s: 356deg; --cl-e: 360deg }
+}
+
+/* --------------------------------------------------------------- counter
+   Upstream circle15: an outer arc and an inner arc turning against each other.
+   The inner arc is softer, which separates the two at 20px where equal
+   weights merge into one knot. */
+.cl-counter {
+  border: var(--_t) solid currentColor;
+  border-bottom-color: transparent;
+  animation: cl-spin 1.1s linear infinite;
+}
+.cl-counter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  box-sizing: border-box;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  border: var(--_t) solid var(--_soft);
+  border-top-color: transparent;
+  animation: cl-spin-rev .7s linear infinite;
+}
+
+/* ------------------------------------------------------------------ twin
+   Upstream bubble02: two dots that swell and shrink in turn while the pair
+   turns. Centred on the axis (upstream sits them on the left edge, so the pair
+   wobbles), eased, and the second dot is softer so the pair has a lead. */
+.cl-twin { animation: cl-spin 1.2s linear infinite }
+.cl-twin::before,
+.cl-twin::after {
+  content: "";
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: currentColor;
+  animation: cl-twin-swell 1.2s ease-in-out infinite;
+}
+.cl-twin::after  { top: 0 }
+.cl-twin::before { bottom: 0; background: var(--_soft); animation-delay: -.6s }
+@keyframes cl-twin-swell {
+  0%, 100% { transform: scale(.12) }
+  50%      { transform: scale(1) }
+}
+
+/* ----------------------------------------------------------------- orbit
+   Upstream bubble33: a body with a small moon in orbit. The body becomes a lit
+   sphere that breathes; the moon is a painted dot on a turning layer, so only
+   transforms animate. */
+.cl-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 33%;
+  border-radius: 50%;
+  background: currentColor;
+  background: radial-gradient(circle at 34% 30%, color-mix(in srgb, currentColor 45%, #fff), currentColor 62%);
+  animation: cl-core 2.4s ease-in-out infinite;
+}
+.cl-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* The moon: a circle 11% of the box in radius, 37% of the box above centre. */
+  background: radial-gradient(circle at 50% 13%, currentColor calc(var(--_s) * .11), transparent calc(var(--_s) * .11 + .5px));
+  animation: cl-spin 1.2s linear infinite;
+}
+@keyframes cl-core {
+  0%, 100% { transform: scale(1) }
+  50%      { transform: scale(.88) }
+}
+
+/* ---------------------------------------------------------------- ripple
+   Upstream circle20 and bubble34: rings expanding from a point. Adds the centre
+   dot, ease-out expansion (fast start, slow fade, like a real ripple), and
+   negative delays so the second ring is already out when the page paints. */
+.cl-ripple {
+  background: radial-gradient(circle closest-side, currentColor calc(var(--_s) * .075), transparent calc(var(--_s) * .075 + .5px));
+}
+.cl-ripple::before,
+.cl-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: clamp(1.5px, calc(var(--_s) * .05), 3px) solid currentColor;
+  opacity: 0;
+  animation: cl-ripple 1.8s cubic-bezier(.2, .6, .3, 1) infinite;
+}
+.cl-ripple::after { animation-delay: -.9s }
+@keyframes cl-ripple {
+  0%   { transform: scale(.1); opacity: .9 }
+  100% { transform: scale(1);  opacity: 0 }
+}
+
+/* -------------------------------------------------------------- segments
+   Upstream circle21: a dotted-border ring. Browsers draw `border: dotted`
+   differently (and as mush under 24px), so this builds twelve segments with
+   a conic mask and fades them into a comet tail as the ring turns. */
+.cl-segments {
+  background: conic-gradient(var(--_tail), currentColor);
+  -webkit-mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - var(--_t) * 1.9), #000 calc(100% - var(--_t) * 1.9 + .5px)),
+    repeating-conic-gradient(#000 0 20deg, transparent 20deg 30deg);
+  -webkit-mask-composite: source-in;
+          mask-image:
+    radial-gradient(farthest-side, transparent calc(100% - var(--_t) * 1.9), #000 calc(100% - var(--_t) * 1.9 + .5px)),
+    repeating-conic-gradient(#000 0 20deg, transparent 20deg 30deg);
+          mask-composite: intersect;
+  animation: cl-spin 1.2s linear infinite;
+}
+
+/* ----------------------------------------------------------------- pulse
+   Upstream circle19: a ring that condenses out of nothing, then thumps once.
+   Eased in and out (upstream is linear, so the thump is a hard kink). */
+.cl-pulse {
+  border: var(--_t) solid currentColor;
+  animation: cl-thump 1.4s ease-in-out infinite;
+}
+.cl-pulse::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--_t) * -1);
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--_t) solid currentColor;
+  animation: cl-condense 1.4s cubic-bezier(.2, .7, .3, 1) infinite;
+}
+@keyframes cl-thump {
+  0%, 60%, 100% { transform: scale(1) }
+  80%           { transform: scale(1.14) }
+}
+@keyframes cl-condense {
+  0%   { transform: scale(0); opacity: 0 }
+  15%  { opacity: 1 }
+  60%, 100% { transform: scale(1); opacity: 1 }
+}
+
+/* --------------------------------------------------------------- utility
+   Freeze any loader while it is offscreen or hidden. Add and remove the class
+   from an IntersectionObserver if the page runs a lot of them. */
+.cl-paused, .cl-paused::before, .cl-paused::after { animation-play-state: paused !important }
+
+/* ------------------------------------------------------- reduced motion
+   One still frame, breathing slowly in opacity: nothing travels, but the
+   loader still says "working". !important on the duration also keeps a page
+   rule that shortens every animation to ~0ms from strobing it. */
+@keyframes cl-calm {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: .45 }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-arc, .cl-sweep, .cl-counter, .cl-twin,
+  .cl-orbit, .cl-ripple, .cl-segments, .cl-pulse {
+    animation: cl-calm 2.4s ease-in-out infinite !important;
+  }
+  .cl-sweep::before, .cl-counter::after, .cl-twin::before, .cl-twin::after,
+  .cl-orbit::before, .cl-orbit::after, .cl-pulse::after { animation: none !important }
+  .cl-ripple::before { animation: none !important; opacity: .55; transform: scale(.7) }
+  .cl-ripple::after  { display: none }
+  .cl-sweep::before  { --cl-s: 0deg; --cl-e: 270deg }
+  .cl-twin::before, .cl-twin::after { transform: scale(.7) }
+  .cl-orbit::before  { transform: none }
+}

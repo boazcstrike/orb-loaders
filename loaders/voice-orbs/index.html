@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Voice Orbs — five voice-assistant orbs, seven states</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="../../assets/glass.css" />
+<script src="../../assets/theme.js"></script>
+<style>
+  /* Page layout only. Tokens, surfaces, header, buttons and segments come
+     from glass.css — nothing here hardcodes a colour. */
+
+  main{padding:26px 32px 90px; max-width:1160px; margin:0 auto}
+  section{margin-bottom:44px}
+  h2{
+    font-size:11px; font-weight:600; letter-spacing:.10em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px; max-width:78ch}
+  .card{padding:22px}
+
+  /* ---- controls ---- */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:14px 26px; align-items:center;
+    padding:12px 16px; margin-bottom:22px;
+  }
+  .ctl{display:flex; align-items:center; gap:9px; font-size:11.5px; font-weight:600}
+  .ctl > label, .ctl > .lab{
+    color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-size:10.5px;
+  }
+  .val{font-variant-numeric:tabular-nums; min-width:36px; color:var(--muted)}
+  .seg.wrap{flex-wrap:wrap}
+  .meter{
+    width:92px; height:6px; border-radius:99px; background:var(--line); overflow:hidden;
+  }
+  .meter i{display:block; height:100%; width:0; background:var(--accent); border-radius:99px}
+  #level-note{font-size:11px; color:var(--muted); min-height:1.2em}
+
+  /* ---- the five ---- */
+  .five{display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:14px}
+  .orbcard{padding:10px; display:flex; flex-direction:column}
+  .orbcard .stage{display:flex; align-items:center; justify-content:center; min-height:176px; padding:16px}
+  .orbcard .meta{padding:13px 8px 7px}
+  .orbcard .name{font-size:13px; font-weight:650; letter-spacing:-.01em; display:flex; gap:8px; align-items:center}
+  .orbcard .desc{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.45}
+
+  /* ---- state matrix ---- */
+  .matrix-wrap{overflow-x:auto; padding:6px 10px 10px}
+  table.matrix{border-collapse:collapse; min-width:720px; width:100%}
+  table.matrix th{
+    font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+    padding:10px 6px 8px; text-align:center;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  table.matrix th.row{text-align:left; padding-left:10px; white-space:nowrap; text-transform:none; letter-spacing:0; font-size:12px; color:var(--ink); font-family:inherit}
+  table.matrix td{padding:6px; text-align:center; border-top:1px solid var(--line)}
+  table.matrix td .orbhost{display:flex; justify-content:center}
+  table.matrix td.cell{min-width:88px}
+
+  /* ---- size ladder ---- */
+  .ladder{display:flex; flex-wrap:wrap; gap:14px}
+  .ladder .cell{
+    flex:1 1 118px; padding:20px 10px 14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:14px;
+  }
+  .cell .cap{
+    font-size:10.5px; font-weight:600; color:var(--muted); letter-spacing:.07em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .orbhost{display:flex; align-items:center; justify-content:center}
+
+  /* ---- in context ---- */
+  .chat{max-width:460px}
+  .chat-head{display:flex; align-items:center; gap:10px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+  .chat-head .who{font-size:13px; font-weight:650}
+  .chat-head .status{font-size:11.5px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+  .bubble{
+    margin-top:12px; padding:9px 13px; border-radius:12px; font-size:12.5px; max-width:84%;
+    border:1px solid var(--line); background:var(--surface-2);
+  }
+  .bubble.me{margin-left:auto; background:var(--accent-soft)}
+  .ctx-row{display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start}
+  .call{display:flex; flex-direction:column; align-items:center; gap:14px; padding:26px 38px}
+  .call .lab{font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; min-width:12ch; text-align:center}
+  .btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px}
+
+  table.rec{width:100%; border-collapse:collapse; font-size:12.5px}
+  table.rec th{
+    text-align:left; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:0 12px 9px 0; border-bottom:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:600;
+  }
+  table.rec td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line); vertical-align:top}
+  table.rec tr:last-child td{border-bottom:0}
+  table.rec td.st{font-weight:650; white-space:nowrap}
+
+  ul.notes{margin:14px 0 0 18px; font-size:12.5px; color:var(--muted)}
+  ul.notes li{margin-bottom:5px}
+  ul.notes strong{color:var(--ink); font-weight:650}
+  .copyrow{display:flex; justify-content:flex-end; margin-top:-2px}
+  .btn.small{padding:6px 12px; font-size:11.5px}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <div>
+      <a class="back" href="../../index.html">&larr; Orb Loaders catalogue</a>
+      <h1>Voice Orbs <span>— five orbs, seven states</span></h1>
+      <p>Audio-reactive voice-assistant orbs from <a href="https://github.com/amunozdev/voiceorbs">VoiceOrbs</a>
+         by Alexis Munoz, ported to dependency-free vanilla JS on a plain 2D canvas. No React, no WebGL, no
+         build step. Every orb shares one contract: <strong>idle, connecting, listening, thinking, speaking,
+         error, disabled</strong>, plus a <code>level</code> from 0 to 1 that stands in for audio input.</p>
+    </div>
+    <button class="theme-toggle" type="button">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      </svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+      <span>Theme</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="controls glass">
+    <div class="ctl">
+      <span class="lab" id="lab-state">State</span>
+      <div class="seg wrap" id="seg-state" role="group" aria-labelledby="lab-state"></div>
+    </div>
+    <div class="ctl">
+      <span class="lab" id="lab-palette">Palette</span>
+      <div class="seg wrap" id="seg-palette" role="group" aria-labelledby="lab-palette">
+        <button data-v="default" aria-pressed="true">Default</button>
+        <button data-v="ocean" aria-pressed="false">Ocean</button>
+        <button data-v="jade" aria-pressed="false">Jade</button>
+        <button data-v="ember" aria-pressed="false">Ember</button>
+        <button data-v="mono" aria-pressed="false">Mono</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span class="lab" id="lab-level">Level</span>
+      <div class="seg" id="seg-level" role="group" aria-labelledby="lab-level">
+        <button data-v="synthetic" aria-pressed="true">Synthetic</button>
+        <button data-v="builtin" aria-pressed="false">Built-in</button>
+        <button data-v="mic" aria-pressed="false">Mic</button>
+      </div>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    </div>
+    <div class="ctl">
+      <label for="speed">Speed</label>
+      <input type="range" id="speed" min="0.3" max="2.5" step="0.1" value="1" />
+      <span class="val" id="speed-val">1.0&times;</span>
+    </div>
+    <div id="level-note" role="status"></div>
+  </div>
+
+  <section>
+    <h2>1 &middot; The five orbs</h2>
+    <p class="sub">All five follow the state picked above, so you can watch the same state translate five ways.
+       <em>Synthetic</em> level is a sine plus noise shaped like speech while listening and speaking;
+       <em>Built-in</em> uses each state's own energy curve; <em>Mic</em> reads your microphone locally
+       (nothing leaves the page).</p>
+    <div class="five" id="five"></div>
+  </section>
+
+  <section>
+    <h2>2 &middot; Five orbs &times; seven states</h2>
+    <p class="sub">Every cell is a live orb pinned to one state, at 64&nbsp;px. Listening and speaking take the
+       level above; the other states run on their own.</p>
+    <div class="glass matrix-wrap"><table class="matrix" id="matrix"></table></div>
+  </section>
+
+  <section>
+    <h2>3 &middot; One orb, every size</h2>
+    <p class="sub">Detail follows size: fewer dots, bars and segments, and heavier minimum strokes, below
+       roughly 64&nbsp;px, so the 16&ndash;24&nbsp;px end still reads as the same orb.</p>
+    <div class="controls glass" style="margin-bottom:14px">
+      <div class="ctl"><span class="lab" id="lab-orb">Orb</span><div class="seg wrap" id="seg-orb" role="group" aria-labelledby="lab-orb"></div></div>
+    </div>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <section>
+    <h2>4 &middot; In context</h2>
+    <p class="sub">A chat header status beside a message thread, and a full-height call screen. The conversation
+       button walks the real lifecycle; the orb picker is the one from the size ladder.</p>
+    <div class="ctx-row">
+      <div class="card glass chat" style="flex:1 1 320px">
+        <div class="chat-head">
+          <div class="orbhost" id="chat-orb"></div>
+          <div class="who">Assistant</div>
+          <div class="status" id="chat-status">Idle</div>
+        </div>
+        <div class="bubble me">What is on my calendar tomorrow?</div>
+        <div class="bubble">Two meetings: stand-up at 9:30 and the design review at 2.</div>
+      </div>
+      <div class="card glass call">
+        <div class="orbhost" id="call-orb"></div>
+        <div class="lab" id="call-label">Idle</div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="run-convo" type="button">Run a conversation</button>
+      <button class="btn ghost" id="run-error" type="button">Fail mid-call</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>5 &middot; Which one goes where</h2>
+    <p class="sub">A starting point, not a rule.</p>
+    <div class="card glass">
+      <table class="rec" id="rec">
+        <thead><tr><th>Orb</th><th>Use it for</th><th>Why</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>6 &middot; Dropping it into a page</h2>
+    <p class="sub">One file, no build step, no dependency, works from <code>file://</code>.</p>
+    <div class="card glass">
+      <div class="copyrow"><button class="btn ghost small" id="copy-snippet" type="button">Copy snippet</button></div>
+<pre id="snippet"><span class="c">// load it — UMD, so a script tag or a bundler import both work</span>
+&lt;script src="voice-orbs.js"&gt;&lt;/script&gt;
+
+<span class="c">// mount into any element; theme follows the page unless you pin it</span>
+<span class="k">const</span> orb = VoiceOrbs.mount(document.getElementById(<span class="k">'assistant'</span>), {
+  orb: <span class="k">'particles'</span>,   <span class="c">// particles | wave | ring | equalizer | pulse</span>
+  state: <span class="k">'idle'</span>,      <span class="c">// idle | connecting | listening | thinking | speaking | error | disabled</span>
+  size: 96,
+  theme: <span class="k">'auto'</span>       <span class="c">// 'auto' | 'light' | 'dark'</span>
+});
+
+orb.setState(<span class="k">'listening'</span>);   <span class="c">// blends over ~0.3s, never cuts</span>
+orb.setLevel(micLevel);          <span class="c">// 0..1, call every frame; null = built-in energy</span>
+orb.destroy();                   <span class="c">// stops drawing, removes the nodes and listeners</span></pre>
+      <ul class="notes">
+        <li><strong>Cost:</strong> one file, about 50&nbsp;KB as authored. One shared <code>requestAnimationFrame</code> loop for every orb on the page; an orb offscreen or in a hidden tab costs nothing.</li>
+        <li><strong>Accessibility:</strong> <code>role="img"</code> with a label that tracks the state ("Assistant orb, listening"). <code>prefers-reduced-motion</code> paints one static pose per state and never animates.</li>
+        <li><strong>Licence:</strong> upstream is MIT &mdash; the full notice is in the file header.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script src="voice-orbs.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STATE_INFO = {
+    idle:       'Waiting. Slow breathing.',
+    connecting: 'Opening a session.',
+    listening:  'Mic open; follows input.',
+    thinking:   'The model is working.',
+    speaking:   'Playing the reply.',
+    error:      'Failed. Rose ink, a shake.',
+    disabled:   'Unavailable. Dimmed grey.'
+  };
+  var STATUS_TEXT = {
+    idle: 'Idle', connecting: 'Connecting…', listening: 'Listening…', thinking: 'Thinking…',
+    speaking: 'Speaking…', error: 'Something went wrong', disabled: 'Unavailable'
+  };
+  var ORB_INFO = {
+    particles: ['Dots', 'Hundreds of dots on a turning sphere. Ripples while listening, streams while speaking, collapses to a ring while connecting.'],
+    wave:      ['Lines', 'Four overlapping sine envelopes. Flat at rest, surging with the voice.'],
+    ring:      ['Ring', 'A circle displaced by the voice. Echo rings while thinking, a dashed orbit while connecting.'],
+    equalizer: ['Bars', 'Seven capsule bars in a glass disc. A different bar layer per state, cross-faded.'],
+    pulse:     ['Core', 'A glossy core that emits rings. A conic arc spins while connecting and thinking.']
+  };
+  var RECOMMEND = [
+    ['particles', 'Hero / full-screen voice mode', 'Richest and calmest; the dots stay legible at rest and read as alive without a level.'],
+    ['wave',      'Wide slots: composer bars, call footers', 'The only horizontal one. Flat line at rest is a very clear "off".'],
+    ['ring',      'Mid-size status, push-to-talk buttons', 'A single stroke, so it holds up at 40 px and inside a circular button.'],
+    ['equalizer', 'Anything that should say "audio"', 'Bars are the universal voice glyph; reads at a glance even at 20 px.'],
+    ['pulse',     'Chat headers, inline agent steps', 'Smallest footprint at rest; rings only appear when something is happening.']
+  ];
+  var PALETTES = {
+    'default': null,
+    ocean: ['#38bdf8', '#6366f1'],
+    jade:  ['#34d399', '#22d3ee'],
+    ember: ['#fbbf24', '#f472b6'],
+    mono:  ['#e2e8f0', '#94a3b8']
+  };
+  var LADDER_SIZES = [160, 96, 64, 40, 24, 16];
+  var VOICE_STATES = { listening: true, speaking: true };
+
+  var ORBS = VoiceOrbs.ORBS, STATES = VoiceOrbs.STATES;
+  var model = { state: 'idle', palette: 'default', levelMode: 'synthetic', speed: 1, ladderOrb: ORBS[0].id };
+  var entries = [];   // { handle, getState }
+
+  /* ---------- mounting ---------- */
+
+  function mountOrb(host, orbId, size, getState) {
+    var pal = PALETTES[model.palette];
+    var opts = { orb: orbId, state: getState(), size: size, speed: model.speed };
+    if (pal) { opts.colorFrom = pal[0]; opts.colorTo = pal[1]; }
+    entries.push({ handle: VoiceOrbs.mount(host, opts), getState: getState });
+  }
+
+  function currentState() { return model.state; }
+  function fixed(state) { return function () { return state; }; }
+
+  function hostsWith(selector) { return document.querySelectorAll(selector); }
+
+  function buildStatic() {
+    var five = document.getElementById('five');
+    ORBS.forEach(function (o) {
+      var el = document.createElement('div');
+      el.className = 'orbcard glass';
+      el.innerHTML =
+        '<div class="stage well"><div class="orbhost" data-role="five" data-orb="' + o.id + '"></div></div>' +
+        '<div class="meta"><div class="name">' + o.name + ' <span class="tag">' + ORB_INFO[o.id][0] + '</span></div>' +
+        '<div class="desc">' + ORB_INFO[o.id][1] + '</div></div>';
+      five.appendChild(el);
+    });
+
+    var matrix = document.getElementById('matrix');
+    var head = '<tr><th></th>' + STATES.map(function (s) { return '<th scope="col">' + s + '</th>'; }).join('') + '</tr>';
+    var rows = ORBS.map(function (o) {
+      return '<tr><th class="row" scope="row">' + o.name + '</th>' + STATES.map(function (s) {
+        return '<td class="cell"><div class="orbhost" data-role="matrix" data-orb="' + o.id + '" data-state="' + s + '"></div></td>';
+      }).join('') + '</tr>';
+    }).join('');
+    matrix.innerHTML = '<thead>' + head + '</thead><tbody>' + rows + '</tbody>';
+
+    var rec = document.querySelector('#rec tbody');
+    RECOMMEND.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="st">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td>';
+      rec.appendChild(tr);
+    });
+  }
+
+  function buildLadder() {
+    var ladder = document.getElementById('ladder');
+    ladder.innerHTML = '';
+    LADDER_SIZES.forEach(function (sz) {
+      var cell = document.createElement('div');
+      cell.className = 'cell glass';
+      cell.innerHTML = '<div class="orbhost" data-role="ladder" data-size="' + sz + '"></div><div class="cap">' + sz + ' px</div>';
+      ladder.appendChild(cell);
+    });
+  }
+
+  function render() {
+    entries.forEach(function (e) { e.handle.destroy(); });
+    entries = [];
+    Array.prototype.forEach.call(hostsWith('[data-role="five"]'), function (h) {
+      mountOrb(h, h.dataset.orb, 128, currentState);
+    });
+    Array.prototype.forEach.call(hostsWith('[data-role="matrix"]'), function (h) {
+      mountOrb(h, h.dataset.orb, 64, fixed(h.dataset.state));
+    });
+    Array.prototype.forEach.call(hostsWith('[data-role="ladder"]'), function (h) {
+      mountOrb(h, model.ladderOrb, Number(h.dataset.size), currentState);
+    });
+    mountOrb(document.getElementById('chat-orb'), model.ladderOrb, 24, function () { return convoState; });
+    mountOrb(document.getElementById('call-orb'), model.ladderOrb, 128, function () { return convoState; });
+  }
+
+  /* ---------- segmented controls ---------- */
+
+  function segment(id, onPick) {
+    var root = document.getElementById(id);
+    root.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      onPick(btn.dataset.v);
+    });
+    return root;
+  }
+
+  function fillSegment(root, values, pressed) {
+    values.forEach(function (v) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.v = v;
+      b.textContent = v;
+      b.setAttribute('aria-pressed', String(v === pressed));
+      root.appendChild(b);
+    });
+  }
+
+  fillSegment(document.getElementById('seg-state'), STATES, model.state);
+  fillSegment(document.getElementById('seg-orb'), ORBS.map(function (o) { return o.id; }), model.ladderOrb);
+
+  function pushState() {
+    entries.forEach(function (e) { e.handle.setState(e.getState()); });
+  }
+
+  segment('seg-state', function (v) { model.state = v; pushState(); });
+  segment('seg-palette', function (v) { model.palette = v; render(); });
+  segment('seg-orb', function (v) { model.ladderOrb = v; render(); });
+  segment('seg-level', function (v) { setLevelMode(v); });
+
+  var speed = document.getElementById('speed');
+  var speedVal = document.getElementById('speed-val');
+  speed.addEventListener('input', function () {
+    model.speed = Number(speed.value);
+    speedVal.textContent = model.speed.toFixed(1) + '×';
+    render();
+  });
+
+  /* ---------- level: synthetic sine + noise, or the microphone ---------- */
+
+  var levelNote = document.getElementById('level-note');
+  var meter = document.getElementById('meter');
+  var mic = null;   // { ctx, stream, analyser, buf }
+
+  // Speech-shaped: a syllable-rate envelope riding a slow phrase envelope, plus a little noise.
+  function synth(t, rate, phrase) {
+    var syll = 0.5 + 0.5 * Math.sin(t * rate + Math.sin(t * 1.7) * 2);
+    var env = 0.6 + 0.4 * Math.sin(t * phrase);
+    var noise = Math.sin(t * 37.1) * Math.sin(t * 23.7);
+    return Math.min(1, Math.max(0, 0.14 + 0.66 * syll * env + 0.1 * noise));
+  }
+
+  function micLevel() {
+    mic.analyser.getByteTimeDomainData(mic.buf);
+    var sum = 0;
+    for (var i = 0; i < mic.buf.length; i++) { var v = (mic.buf[i] - 128) / 128; sum += v * v; }
+    return Math.min(1, Math.sqrt(sum / mic.buf.length) * 5);
+  }
+
+  function stopMic() {
+    if (!mic) return;
+    mic.stream.getTracks().forEach(function (t) { t.stop(); });
+    mic.ctx.close();
+    mic = null;
+  }
+
+  function setLevelMode(mode) {
+    stopMic();
+    model.levelMode = mode;
+    levelNote.textContent = '';
+    if (mode !== 'mic') return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      fallbackFromMic('This browser has no microphone API.');
+      return;
+    }
+    levelNote.textContent = 'Waiting for microphone permission…';
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      if (model.levelMode !== 'mic') { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      ctx.createMediaStreamSource(stream).connect(analyser);
+      mic = { ctx: ctx, stream: stream, analyser: analyser, buf: new Uint8Array(analyser.fftSize) };
+      levelNote.textContent = 'Mic on. Pick listening or speaking and talk. Audio stays in this tab.';
+    }).catch(function (err) {
+      fallbackFromMic('Microphone unavailable (' + (err && err.name ? err.name : 'error') + '). Back on synthetic input.');
+    });
+  }
+
+  function fallbackFromMic(message) {
+    model.levelMode = 'synthetic';
+    levelNote.textContent = message;
+    var root = document.getElementById('seg-level');
+    Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.v === 'synthetic'));
+    });
+  }
+
+  function tick(now) {
+    var t = now / 1000, listen, speak;
+    if (model.levelMode === 'mic' && mic) { listen = speak = micLevel(); }
+    else { listen = synth(t, 6.3, 1.1); speak = synth(t + 5, 9.1, 0.7); }
+    var useLevel = model.levelMode !== 'builtin';
+    for (var i = 0; i < entries.length; i++) {
+      var s = entries[i].getState();
+      entries[i].handle.setLevel(useLevel && VOICE_STATES[s] ? (s === 'listening' ? listen : speak) : null);
+    }
+    var shown = !useLevel ? 0 : VOICE_STATES[model.state] ? (model.state === 'listening' ? listen : speak) : 0;
+    meter.style.width = (shown * 100).toFixed(0) + '%';
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- in-context conversation ---------- */
+
+  var convoState = 'idle';
+  var convoTimers = [];
+  var chatStatus = document.getElementById('chat-status');
+  var callLabel = document.getElementById('call-label');
+
+  function setConvo(state) {
+    convoState = state;
+    chatStatus.textContent = callLabel.textContent = STATUS_TEXT[state];
+    pushState();
+  }
+
+  function clearConvo() { convoTimers.forEach(clearTimeout); convoTimers = []; }
+
+  function runSequence(steps) {
+    clearConvo();
+    var at = 0;
+    steps.forEach(function (step) {
+      convoTimers.push(setTimeout(function () { setConvo(step[0]); }, at));
+      at += step[1];
+    });
+  }
+
+  document.getElementById('run-convo').addEventListener('click', function () {
+    runSequence([['connecting', 1400], ['listening', 2800], ['thinking', 1800], ['speaking', 3400], ['idle', 0]]);
+  });
+  document.getElementById('run-error').addEventListener('click', function () {
+    runSequence([['connecting', 1200], ['listening', 1800], ['error', 2600], ['idle', 0]]);
+  });
+
+  /* ---------- copy snippet ---------- */
+
+  var copyBtn = document.getElementById('copy-snippet');
+  copyBtn.addEventListener('click', function () {
+    var text = document.getElementById('snippet').textContent;
+    var done = function (msg) {
+      copyBtn.textContent = msg;
+      setTimeout(function () { copyBtn.textContent = 'Copy snippet'; }, 1600);
+    };
+    if (!navigator.clipboard) { done('Select and copy'); return; }
+    navigator.clipboard.writeText(text).then(function () { done('Copied'); }, function () { done('Copy blocked'); });
+  });
+
+  /* ---------- boot ---------- */
+
+  buildStatic();
+  buildLadder();
+  render();
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>

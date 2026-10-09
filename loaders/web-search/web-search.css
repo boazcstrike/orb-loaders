@@ -1,0 +1,242 @@
+/*!
+ * web-search.css — styles for web-search.js. Every class is prefixed `wsr-`.
+ *
+ * Ported from solid-thinking-orbs (MIT) https://github.com/Mvkweb/solid-thinking-orbs
+ * Design credit also given upstream to Alex Brinza (https://x.com/a_brinza).
+ *
+ * MIT License
+ *
+ * Copyright (c) 2026 Jakub Antalik (Original React Implementation)
+ * Copyright (c) 2026 Mvkweb (SolidJS Port)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Adapted for orb-loaders: CSS module translated to plain scoped CSS, sized in em from one
+ * `font-size` so it scales as a unit, ink derived from `currentColor` so it themes itself.
+ */
+
+.wsr {
+  --wsr-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --wsr-dim: 0.62;                      /* secondary text (urls, count) */
+  --wsr-faint: 0.42;                    /* decorative only (separators, icons at rest) */
+  --wsr-ok: #15803d;                    /* done tick — 5.0:1 on white */
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  width: 100%;
+  max-width: 540px;
+  font-family: inherit;
+  font-size: 13px;                      /* overridden inline by the `size` option */
+  line-height: 1.4;
+  color: inherit;
+}
+:root[data-theme="dark"] .wsr { --wsr-ok: #4ade80 }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .wsr { --wsr-ok: #4ade80 }
+}
+
+/* ---- header row ---- */
+.wsr-row { display: flex; align-items: center; gap: 0.46em; min-height: 1.55em }
+.wsr-row > svg { flex: none; width: 1.08em; height: 1.08em; opacity: var(--wsr-dim); margin-left: -1px }
+
+.wsr-label { display: inline-flex; align-items: center; gap: 0.3em; min-width: 0; font-weight: 550; white-space: nowrap }
+.wsr-query {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wsr-count {
+  flex: none;
+  font-weight: 450;
+  opacity: var(--wsr-dim);
+  font-variant-numeric: tabular-nums;
+}
+.wsr-chevron {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3em;
+  height: 1.3em;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  opacity: var(--wsr-faint);
+  cursor: pointer;
+  transition: opacity 0.16s var(--wsr-ease), transform 0.28s var(--wsr-ease);
+}
+.wsr-chevron svg { width: 0.8em; height: 0.8em }
+.wsr-chevron:hover { opacity: var(--wsr-dim) }
+.wsr-chevron:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; opacity: 1 }
+.wsr-chevron[aria-expanded="false"] { transform: rotate(180deg) }
+
+/* Shimmer: one highlight sweeps the text, then rests. A mask, so it needs no colour. */
+.wsr-shimmer {
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  animation: wsr-shine 2.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes wsr-shine {
+  0%, 12%   { -webkit-mask-position: 130% 0; mask-position: 130% 0 }
+  88%, 100% { -webkit-mask-position: -30% 0; mask-position: -30% 0 }
+}
+.wsr[data-state="done"] .wsr-shimmer { animation: none; -webkit-mask-image: none; mask-image: none }
+
+/* ---- results ---- */
+.wsr-collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 0.32s var(--wsr-ease), opacity 0.22s var(--wsr-ease);
+}
+.wsr-collapsible.is-collapsed { grid-template-rows: 0fr; opacity: 0; pointer-events: none }
+.wsr-inner { min-height: 0; overflow: hidden }
+
+.wsr-results { position: relative; display: flex; gap: 0.46em; align-items: stretch }
+.wsr-rail {
+  flex: none;
+  width: 1px;
+  margin-left: 0.42em;
+  background: currentColor;
+  opacity: 0.16;
+}
+.wsr-list {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.46em;
+  margin: 0;
+  padding: 0.3em 0 0.15em 0.46em;
+  list-style: none;
+  font-size: 0.923em;
+}
+
+.wsr-site {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  min-width: 0;
+  line-height: 1.5;
+  /* Rows enter once on mount, staggered by --wsr-i. They are not re-triggered on loop. */
+  opacity: 0;
+  transform: translateY(4px);
+  animation: wsr-enter 0.34s var(--wsr-ease) forwards;
+  animation-delay: calc(var(--wsr-i, 0) * 60ms);
+}
+@keyframes wsr-enter { to { opacity: 1; transform: translateY(0) } }
+.wsr-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  min-width: 0;
+  flex: 0 1 auto;
+  color: inherit;
+  text-decoration: none;
+}
+.wsr-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 4px }
+
+/* ---- bullet: dots (pending) -> globe (loading) -> tick (done) ---- */
+.wsr-bullet { position: relative; width: 1em; height: 1em; flex: none }
+.wsr-bullet > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center }
+.wsr-dots svg { width: 1.33em; height: 1.33em; flex: none; opacity: var(--wsr-faint); transition: opacity 0.32s var(--wsr-ease) }
+.wsr-globe svg { width: 1em; height: 1em; overflow: visible; flex: none; opacity: 0.85 }
+.wsr-globe { opacity: 0; transform: scale(0.88); transition: opacity 0.32s var(--wsr-ease), transform 0.36s var(--wsr-ease) }
+.wsr-check { opacity: 0; transform: scale(1.175); color: var(--wsr-ok); transition: opacity 0.24s var(--wsr-ease) 0.06s, transform 0.28s var(--wsr-ease) 0.06s }
+.wsr-check svg { width: 1.33em; height: 1.33em; flex: none }
+
+.wsr-site[data-state="loading"] .wsr-dots,
+.wsr-site[data-state="done"] .wsr-dots { opacity: 0 }
+.wsr-site[data-state="loading"] .wsr-globe { opacity: 1; transform: scale(1) }
+.wsr-site[data-state="done"] .wsr-globe { opacity: 0; transform: scale(0.775); transition-duration: 0.22s, 0.26s }
+.wsr-site[data-state="done"] .wsr-check { opacity: 1; transform: scale(1) }
+
+/* Radar nod: a faint ping ring leaves the globe while it is loading. */
+.wsr-bullet > .wsr-ping {
+  inset: -0.15em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.wsr-site[data-state="loading"] .wsr-ping { animation: wsr-ping 1.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite }
+@keyframes wsr-ping {
+  0%   { opacity: 0.38; transform: scale(0.8) }
+  100% { opacity: 0; transform: scale(2) }
+}
+
+/* ---- row text ---- */
+.wsr-title { flex: none; white-space: nowrap; font-weight: 450; transition: opacity 0.3s var(--wsr-ease) }
+.wsr-site[data-state="pending"] .wsr-title { opacity: var(--wsr-dim) }
+.wsr-site[data-state="loading"] .wsr-title { animation: wsr-shine 2.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,.55) 0, rgba(0,0,0,.55) 35%, #000 50%, rgba(0,0,0,.55) 65%, rgba(0,0,0,.55) 100%);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+}
+.wsr-sep { flex: none; opacity: var(--wsr-faint) }
+.wsr-url {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: var(--wsr-dim);
+  transition: opacity 0.16s var(--wsr-ease);
+}
+.wsr-arrow {
+  flex: none;
+  display: inline-flex;
+  margin-left: -0.15em;
+  opacity: 0;
+  transform: rotate(45deg) translate(0, 2px);
+  transition: opacity 0.16s var(--wsr-ease), transform 0.22s var(--wsr-ease);
+}
+.wsr-arrow svg { width: 0.85em; height: 0.85em }
+.wsr-site[data-state="done"] .wsr-link:hover .wsr-arrow,
+.wsr-site[data-state="done"] .wsr-link:focus-visible .wsr-arrow { opacity: 0.7; transform: rotate(45deg) translate(0, 0) }
+.wsr-site[data-state="done"] .wsr-link:hover .wsr-url { opacity: 1 }
+
+.wsr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Offscreen or tab hidden: freeze the CSS loops (the JS pauses the SVG globes; the timeline keeps running). */
+.wsr.is-paused .wsr-shimmer,
+.wsr.is-paused .wsr-title,
+.wsr.is-paused .wsr-ping { animation-play-state: paused }
+
+@media (prefers-reduced-motion: reduce) {
+  .wsr-shimmer, .wsr-site[data-state="loading"] .wsr-title {
+    animation: none; -webkit-mask-image: none; mask-image: none;
+  }
+  .wsr-ping { display: none }
+  .wsr-site { animation: none; opacity: 1; transform: none }
+  .wsr-collapsible, .wsr-globe, .wsr-check, .wsr-dots svg, .wsr-chevron, .wsr-title, .wsr-arrow { transition: none }
+}

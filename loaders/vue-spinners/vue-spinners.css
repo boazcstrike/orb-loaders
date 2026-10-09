@@ -1,0 +1,345 @@
+/*!
+ * vue-spinners.css: eight spinners extracted from vue-spinner, with no Vue.
+ *
+ * Upstream project : vue-spinner, https://github.com/greyby/vue-spinner
+ *                    (demo: http://greyby.github.io/vue-spinner/)
+ * Upstream author  : greyby, Beijing, China
+ * Upstream licence : MIT
+ *
+ *   The MIT License (MIT)
+ *
+ *   Copyright (c) 2015 greyby
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the "Software"), to deal
+ *   in the Software without restriction, including without limitation the rights
+ *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *   copies of the Software, and to permit persons to whom the Software is
+ *   furnished to do so, subject to the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be included in all
+ *   copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *   SOFTWARE.
+ *
+ * Credit chain: vue-spinner states that it is "Based on Halogen by yuanyan"
+ * (https://github.com/yuanyan/halogen), which is itself MIT licensed. Halogen's
+ * licence notice is reproduced here because its spinner designs are the origin of
+ * the keyframes below:
+ *
+ *   The MIT License (MIT)
+ *
+ *   Copyright (c) 2015 Yuanyan Cao
+ *
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the "Software"), to deal
+ *   in the Software without restriction, including without limitation the rights
+ *   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *   copies of the Software, and to permit persons to whom the Software is
+ *   furnished to do so, subject to the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be included in all
+ *   copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *   SOFTWARE.
+ *
+ * Adapted for orb-loaders: the Vue components (ClipLoader, RingLoader, MoonLoader,
+ * DotLoader, BounceLoader, PulseLoader, SyncLoader, GridLoader) are reduced to
+ * plain markup plus this stylesheet. Inline-style props become --vs-size and
+ * currentColor; the green default colour is dropped; sizes, thickness and travel
+ * all scale with --vs-size; the 3D rings use a real perspective() in the
+ * transform (upstream sets `perspective` on the element it also rotates, which
+ * has no effect); delays are negative so every spinner starts mid-motion; grid
+ * timings are fixed instead of Math.random(); and a reduced-motion fallback is
+ * added.
+ *
+ * Markup (vue-spinners.js builds it for you):
+ *   clip, ring, moon, dot, bounce : <span class="vs-clip"></span>
+ *   pulse, sync                   : <span class="vs-pulse"><i></i><i></i><i></i></span>
+ *   grid                          : <span class="vs-grid"> nine <i></i> </span>
+ * Size  : --vs-size (any length, default 48px). Orbs: the diameter. Dot rows and
+ *         the grid: the overall width.
+ * Colour: `color` on the element or any ancestor.
+ * Announce: wrap the spinner in a role="status" element with a visually-hidden label:
+ *   <span role="status"><span class="vs-ring"></span><span class="vs-sr">Loading…</span></span>
+ *   (vue-spinners.js makes the spinner itself the status element and adds the
+ *   .vs-sr span inside it.)
+ */
+
+/* Visually-hidden text for the role="status" element: read by screen readers, never seen. */
+.vs-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.vs-clip, .vs-ring, .vs-moon, .vs-dot, .vs-bounce,
+.vs-pulse, .vs-sync, .vs-grid {
+  --_s: var(--vs-size, 48px);
+  --_gap: calc(var(--_s) * .08);
+  --_t: clamp(2px, calc(var(--_s) * .1), 6px);
+  --_soft: rgba(128, 128, 128, .5);
+  --_track: rgba(128, 128, 128, .22);
+
+  display: inline-block;
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  .vs-clip, .vs-ring, .vs-moon, .vs-dot, .vs-bounce,
+  .vs-pulse, .vs-sync, .vs-grid {
+    --_soft: color-mix(in srgb, currentColor 48%, transparent);
+    --_track: color-mix(in srgb, currentColor 16%, transparent);
+  }
+}
+
+/* Orbs are square boxes. */
+.vs-clip, .vs-ring, .vs-moon, .vs-dot, .vs-bounce {
+  width: var(--_s);
+  height: var(--_s);
+  border-radius: 50%;
+}
+
+/* Dot rows and the grid size from their width; their <i> children are dots. */
+.vs-pulse, .vs-sync, .vs-grid { width: var(--_s) }
+.vs-pulse > i, .vs-sync > i, .vs-grid > i {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@keyframes vs-spin { to { transform: rotate(360deg) } }
+
+/* ------------------------------------------------------------------ clip
+   Upstream ClipLoader: a ring with its bottom open, turning while it breathes
+   (scale 1, .8, 1). The turn and the breath are split across the element and
+   its ring, so the breath can ease in and out while the turn stays even. */
+.vs-clip { animation: vs-spin .75s linear infinite }
+.vs-clip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--_t) solid currentColor;
+  border-bottom-color: transparent;
+  animation: vs-breathe .75s ease-in-out infinite;
+}
+@keyframes vs-breathe {
+  0%, 100% { transform: scale(1) }
+  50%      { transform: scale(.8) }
+}
+
+/* ------------------------------------------------------------------ ring
+   Upstream RingLoader: two rings tumbling in 3D at 40% opacity. The
+   perspective now sits inside the transform, scaled to the size, so the
+   rings foreshorten instead of flattening; one ring is stronger than the other
+   so the pair has depth. */
+.vs-ring { --_p: calc(var(--_s) * 13) }
+.vs-ring::before,
+.vs-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--_t) solid currentColor;
+}
+.vs-ring::before { opacity: .85; animation: vs-tumble-a 2s linear infinite }
+.vs-ring::after  { opacity: .4;  animation: vs-tumble-b 2s linear infinite }
+@keyframes vs-tumble-a {
+  from { transform: perspective(var(--_p)) rotateX(0deg)   rotateY(0deg)   rotateZ(0deg) }
+  to   { transform: perspective(var(--_p)) rotateX(180deg) rotateY(360deg) rotateZ(360deg) }
+}
+@keyframes vs-tumble-b {
+  from { transform: perspective(var(--_p)) rotateX(0deg)   rotateY(0deg)   rotateZ(0deg) }
+  to   { transform: perspective(var(--_p)) rotateX(360deg) rotateY(180deg) rotateZ(360deg) }
+}
+
+/* ------------------------------------------------------------------ moon
+   Upstream MoonLoader: a faint ring (10% opacity) with a small moon running
+   round it. The track is lifted to 16% so it shows on both themes, and the moon
+   is the same width as the track so it sits flush in it. */
+.vs-moon {
+  --_t: clamp(2px, calc(var(--_s) / 7), 8px);
+  animation: vs-spin .8s linear infinite;
+}
+.vs-moon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: var(--_t) solid var(--_track);
+}
+.vs-moon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(50% - var(--_t) / 2);
+  width: var(--_t);
+  height: var(--_t);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ------------------------------------------------------------------- dot
+   Upstream DotLoader: two half-size dots, one at each end of a turning bar,
+   each swelling from nothing to full and back. Eased, and the second dot is
+   half a cycle behind so there is always one at full size. */
+.vs-dot { animation: vs-spin 2s linear infinite }
+.vs-dot::before,
+.vs-dot::after {
+  content: "";
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: currentColor;
+  animation: vs-swell 2s ease-in-out infinite;
+}
+.vs-dot::after  { top: 0 }
+.vs-dot::before { bottom: 0; animation-delay: -1s }
+@keyframes vs-swell {
+  0%, 100% { transform: scale(.1) }
+  50%      { transform: scale(1) }
+}
+
+/* ---------------------------------------------------------------- bounce
+   Upstream BounceLoader: two full-size discs that swell and shrink in turn, at
+   60% opacity so they blend where they overlap. */
+.vs-bounce::before,
+.vs-bounce::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .6;
+  animation: vs-swell 2s ease-in-out infinite;
+}
+.vs-bounce::after { animation-delay: -1s }
+
+/* ----------------------------------------------------------------- pulse
+   Upstream PulseLoader: three dots that shrink in sequence with an overshoot
+   curve. They shrink to 35% (upstream goes to 10%, which at 16px is a
+   disappearing act) and the delays are negative so the wave is already running. */
+.vs-pulse { display: inline-flex; gap: var(--_gap) }
+.vs-pulse > i {
+  flex: 1 1 0;
+  animation: vs-shrink .75s infinite cubic-bezier(.2, .68, .18, 1.08);
+}
+.vs-pulse > i:nth-child(1) { animation-delay: -.63s }
+.vs-pulse > i:nth-child(2) { animation-delay: -.51s }
+.vs-pulse > i:nth-child(3) { animation-delay: -.39s }
+@keyframes vs-shrink {
+  0%, 80% { transform: scale(1);    opacity: 1 }
+  45%     { transform: scale(.35);  opacity: .6 }
+}
+
+/* ------------------------------------------------------------------ sync
+   Upstream SyncLoader: three dots dipping and rising in a wave. Travel is a
+   fraction of the dot size instead of a fixed 10px, so it still reads at 20px
+   and does not fly apart at 96px. */
+.vs-sync {
+  --_d: calc((var(--_s) - 2 * var(--_gap)) / 3);
+  display: inline-flex;
+  gap: var(--_gap);
+  align-items: center;
+  height: calc(var(--_d) * 2.6);
+}
+.vs-sync > i {
+  flex: 1 1 0;
+  animation: vs-wave .9s ease-in-out infinite;
+}
+.vs-sync > i:nth-child(1) { animation-delay: -.9s }
+.vs-sync > i:nth-child(2) { animation-delay: -.78s }
+.vs-sync > i:nth-child(3) { animation-delay: -.66s }
+@keyframes vs-wave {
+  25%  { transform: translateY(calc(var(--_d) * .8)) }
+  75%  { transform: translateY(calc(var(--_d) * -.8)) }
+  100% { transform: translateY(0) }
+}
+
+/* ------------------------------------------------------------------ grid
+   Upstream GridLoader: nine dots shrinking and fading on their own clocks. Upstream
+   draws the delay and duration from Math.random() on every mount; these are
+   fixed values with the same spread, so it looks the same each time and
+   needs no script. */
+.vs-grid {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--_gap);
+}
+.vs-grid > i { animation: vs-flicker 1s ease-in-out infinite }
+.vs-grid > i:nth-child(1) { animation-duration: .9s;  animation-delay: -.3s }
+.vs-grid > i:nth-child(2) { animation-duration: 1.3s; animation-delay: -.9s }
+.vs-grid > i:nth-child(3) { animation-duration: .7s;  animation-delay: -.1s }
+.vs-grid > i:nth-child(4) { animation-duration: 1.1s; animation-delay: -.6s }
+.vs-grid > i:nth-child(5) { animation-duration: 1.5s; animation-delay: -.2s }
+.vs-grid > i:nth-child(6) { animation-duration: .8s;  animation-delay: -.8s }
+.vs-grid > i:nth-child(7) { animation-duration: 1.2s; animation-delay: -.4s }
+.vs-grid > i:nth-child(8) { animation-duration: 1s;   animation-delay: -.7s }
+.vs-grid > i:nth-child(9) { animation-duration: 1.4s; animation-delay: -.5s }
+@keyframes vs-flicker {
+  0%, 100% { transform: scale(1);   opacity: 1 }
+  50%      { transform: scale(.5);  opacity: .6 }
+}
+
+/* --------------------------------------------------------------- utility
+   Freeze a spinner while it is offscreen or the tab is hidden. vue-spinners.js
+   toggles this; add it yourself when using the CSS alone. */
+.vs-paused,
+.vs-paused::before,
+.vs-paused::after,
+.vs-paused > i { animation-play-state: paused !important }
+
+/* ------------------------------------------------------- reduced motion
+   Nothing travels. The spinner holds one frame and breathes slowly in opacity.
+   !important on the duration also keeps a page rule that shortens every
+   animation to ~0ms from strobing it. */
+@keyframes vs-calm {
+  0%, 100% { opacity: 1 }
+  50%      { opacity: .45 }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vs-clip, .vs-ring, .vs-moon, .vs-dot, .vs-bounce,
+  .vs-pulse, .vs-sync, .vs-grid { animation: vs-calm 2.4s ease-in-out infinite !important }
+
+  .vs-clip::before, .vs-ring::before, .vs-ring::after,
+  .vs-dot::before, .vs-dot::after, .vs-bounce::before, .vs-bounce::after,
+  .vs-pulse > i, .vs-sync > i, .vs-grid > i { animation: none !important }
+
+  .vs-ring::before { transform: perspective(var(--_p)) rotateX(0deg) }
+  .vs-ring::after  { transform: perspective(var(--_p)) rotateX(65deg) }
+  .vs-dot::before, .vs-dot::after { transform: scale(.7) }
+  .vs-bounce::before { transform: scale(.9) }
+  .vs-bounce::after  { transform: scale(.55) }
+  .vs-pulse > i:nth-child(2) { transform: scale(.6) }
+  .vs-sync > i:nth-child(1) { transform: translateY(calc(var(--_d) * .5)) }
+  .vs-sync > i:nth-child(3) { transform: translateY(calc(var(--_d) * -.5)) }
+  .vs-grid > i { transform: scale(.75) }
+}

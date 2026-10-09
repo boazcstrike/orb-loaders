@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vue Spinners: eight spinners without Vue</title>
+<link rel="icon" href="data:," />
+<link rel="stylesheet" href="../../assets/glass.css" />
+<link rel="stylesheet" href="vue-spinners.css" />
+<script src="../../assets/theme.js"></script>
+<style>
+  /* Page layout only. Tokens, surfaces, header, buttons and segments come
+     from glass.css; the spinners take their colour from `color`. */
+
+  main{padding:26px 32px 90px; max-width:1160px; margin:0 auto}
+  section{margin-bottom:40px}
+  h2{font-size:16px; font-weight:650; letter-spacing:-.01em; margin-bottom:4px}
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:16px; max-width:78ch}
+  .card{padding:22px}
+
+  /* ---- controls ---- */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center;
+    padding:12px 16px; margin-bottom:22px;
+  }
+  .ctl{display:flex; align-items:center; gap:9px; font-size:11.5px; font-weight:600}
+  .ctl label, .ctl .lbl{
+    color:var(--muted); font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    font-size:10.5px;
+  }
+  .val{font-variant-numeric:tabular-nums; min-width:40px; color:var(--muted)}
+
+  /* The spinner colour is a page choice, set once on the stage. */
+  .stage-color{color:var(--accent-ink)}
+  [data-ink="ink"] .stage-color{color:var(--ink)}
+  [data-ink="teal"] .stage-color{color:#0f766e}
+  [data-ink="amber"] .stage-color{color:#b45309}
+  [data-ink="rose"] .stage-color{color:#be123c}
+  :root[data-theme="dark"] [data-ink="teal"] .stage-color{color:#2dd4bf}
+  :root[data-theme="dark"] [data-ink="amber"] .stage-color{color:#fbbf24}
+  :root[data-theme="dark"] [data-ink="rose"] .stage-color{color:#fb7185}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) [data-ink="teal"] .stage-color{color:#2dd4bf}
+    :root:not([data-theme="light"]) [data-ink="amber"] .stage-color{color:#fbbf24}
+    :root:not([data-theme="light"]) [data-ink="rose"] .stage-color{color:#fb7185}
+  }
+
+  /* ---- the eight ---- */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(244px,1fr)); gap:14px}
+  .variant{padding:10px; display:flex; flex-direction:column}
+  .variant .stage{
+    display:flex; align-items:center; justify-content:center;
+    min-height:150px; padding:16px;
+  }
+  .variant .meta{padding:13px 8px 7px}
+  .variant .name{font-size:13px; font-weight:650; letter-spacing:-.01em}
+  .variant .name code{font-size:11.5px; color:var(--accent-ink); font-weight:600; margin-left:4px}
+  .variant .desc{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.45}
+  .variant .from{
+    font-size:10.5px; color:var(--muted); margin-top:10px; padding-top:10px;
+    border-top:1px solid var(--line);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+
+  /* ---- size ladder ---- */
+  .ladder{display:flex; flex-wrap:wrap; gap:14px}
+  .ladder .cell{
+    flex:1 1 118px; padding:20px 12px 14px;
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+  .ladder .slot{min-height:104px; width:100%; display:flex; align-items:center; justify-content:center}
+  .cell .cap{
+    font-size:10.5px; font-weight:600; color:var(--muted); letter-spacing:.07em;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+
+  /* ---- in context ---- */
+  .ctx{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+  .ctx .card{display:flex; flex-direction:column; gap:16px; align-items:flex-start}
+  .ctx h3{font-size:12.5px; font-weight:650}
+  .row{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--muted)}
+  .btn.busy{display:inline-flex; align-items:center; gap:9px; cursor:progress}
+  .hero{align-self:center; display:flex; flex-direction:column; align-items:center; gap:14px; padding:8px 0}
+  .hero p{font-size:12.5px; color:var(--muted)}
+
+  table.rec{width:100%; border-collapse:collapse; font-size:12.5px}
+  table.rec th{
+    text-align:left; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:0 12px 9px 0; border-bottom:1px solid var(--line);
+    font-weight:600;
+  }
+  table.rec td{padding:11px 12px 11px 0; border-bottom:1px solid var(--line); vertical-align:middle}
+  table.rec tr:last-child td{border-bottom:0}
+  table.rec td.st{font-weight:650; white-space:nowrap}
+  table.rec td.st .vs-slot{display:inline-flex; vertical-align:middle; margin-right:10px; width:28px; justify-content:center}
+
+  ul.notes{margin:14px 0 0 18px; font-size:12.5px; color:var(--muted)}
+  ul.notes li{margin-bottom:5px}
+  ul.notes strong{color:var(--ink); font-weight:650}
+
+  .snippet-head{display:flex; justify-content:space-between; align-items:center; gap:12px}
+  .btn.small{padding:6px 14px; font-size:11.5px}
+</style>
+</head>
+<body data-ink="accent">
+
+<header class="site-header">
+  <div class="bar">
+    <div>
+      <a class="back" href="../../index.html">&larr; Orb Loaders catalogue</a>
+      <h1>Vue Spinners <span>&mdash; eight spinners, no Vue</span></h1>
+      <p>Extracted from <a href="https://github.com/greyby/vue-spinner">vue-spinner</a> by greyby, which is itself
+         based on <a href="https://github.com/yuanyan/halogen">Halogen</a> by Yuanyan Cao. The Vue components are
+         reduced to markup and a stylesheet; a small optional script builds the markup and freezes spinners that are
+         offscreen. They take their colour from <code>currentColor</code> and their size from <code>--vs-size</code>.</p>
+    </div>
+    <button class="theme-toggle" type="button">
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+      </svg>
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+      </svg>
+      <span>Theme</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="controls glass">
+    <div class="ctl">
+      <span class="lbl" id="lbl-ink">Colour</span>
+      <div class="seg" id="seg-ink" role="group" aria-labelledby="lbl-ink">
+        <button data-v="accent" aria-pressed="true">Accent</button>
+        <button data-v="ink" aria-pressed="false">Ink</button>
+        <button data-v="teal" aria-pressed="false">Teal</button>
+        <button data-v="amber" aria-pressed="false">Amber</button>
+        <button data-v="rose" aria-pressed="false">Rose</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <label for="size">Size</label>
+      <input type="range" id="size" min="16" max="96" step="4" value="64" />
+      <span class="val" id="size-val">64px</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>The eight spinners</h2>
+    <p class="sub">Each card shows the spinner at the size on the slider. The line under it names the upstream
+       Vue component it came from.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section>
+    <h2>One spinner, every size</h2>
+    <p class="sub">Stroke width, dot gaps and travel are all fractions of <code>--vs-size</code>, so a spinner keeps its
+       shape from 16px to 96px. Pick one to compare.</p>
+    <div class="controls glass" style="margin-bottom:14px">
+      <div class="ctl"><span class="lbl" id="lbl-ladder">Spinner</span>
+        <div class="seg" id="seg-ladder" role="group" aria-labelledby="lbl-ladder"></div></div>
+    </div>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <section>
+    <h2>In context</h2>
+    <p class="sub">An inline 16px spinner inside a button, a 20px one beside a line of text, and a 96px one standing alone.</p>
+    <div class="ctx">
+      <div class="card glass">
+        <h3>Inside a button</h3>
+        <button class="btn busy" type="button" aria-busy="true" style="color:#fff">
+          <span class="slot" data-variant="clip" data-size="16" data-label="Saving"></span>
+          Saving&hellip;
+        </button>
+        <button class="btn ghost busy" type="button" aria-busy="true">
+          <span class="slot" data-variant="pulse" data-size="22" data-label="Uploading"></span>
+          Uploading&hellip;
+        </button>
+      </div>
+      <div class="card glass">
+        <h3>Beside text</h3>
+        <div class="row stage-color">
+          <span class="slot" data-variant="moon" data-size="20" data-label="Checking"></span>
+          <span style="color:var(--muted)">Checking your address&hellip;</span>
+        </div>
+        <div class="row stage-color">
+          <span class="slot" data-variant="dot" data-size="20" data-label="Connecting"></span>
+          <span style="color:var(--muted)">Connecting to the server&hellip;</span>
+        </div>
+      </div>
+      <div class="card glass">
+        <h3>Whole panel</h3>
+        <div class="hero stage-color">
+          <span class="slot" data-variant="ring" data-size="96" data-label="Loading your files"></span>
+          <p>Loading your files&hellip;</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Which one goes where</h2>
+    <p class="sub">A starting point, not a rule. Rings and the moon hold up when small; the dot spinners want a row to themselves.</p>
+    <div class="card glass">
+      <table class="rec" id="rec">
+        <thead><tr><th>Spinner</th><th>Use it for</th><th>Why</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Dropping it into a page</h2>
+    <p class="sub">One stylesheet and one optional script. No build step, no Vue.</p>
+    <div class="card glass">
+      <div class="snippet-head">
+        <span class="sub" style="margin:0">JavaScript and HTML</span>
+        <button class="btn ghost small" type="button" id="copy">Copy snippet</button>
+      </div>
+<pre id="snippet"><span class="c">&lt;!-- load it --&gt;</span>
+&lt;link rel="stylesheet" href="vue-spinners.css"&gt;
+&lt;script src="vue-spinners.js"&gt;&lt;/script&gt;
+
+<span class="c">// mount, then tear down when the wait ends</span>
+const spinner = VueSpinners.mount(document.getElementById('loader'), {
+  variant: 'ring',   <span class="c">// clip | ring | moon | dot | bounce | pulse | sync | grid</span>
+  size: 64,          <span class="c">// pixels</span>
+  color: '#0f766e',  <span class="c">// optional; default is the surrounding text colour</span>
+  label: 'Loading'   <span class="c">// accessible text, visually hidden</span>
+});
+spinner.destroy();
+
+<span class="c">&lt;!-- or, with the CSS alone --&gt;</span>
+&lt;span role="status"&gt;&lt;span class="vs-ring" style="--vs-size: 64px"&gt;&lt;/span&gt;&lt;span class="vs-sr"&gt;Loading…&lt;/span&gt;&lt;/span&gt;
+&lt;span role="status"&gt;&lt;span class="vs-pulse"&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;i&gt;&lt;/i&gt;&lt;/span&gt;&lt;span class="vs-sr"&gt;Loading…&lt;/span&gt;&lt;/span&gt;</pre>
+      <ul class="notes">
+        <li><strong>Cost:</strong> the stylesheet is about 13&nbsp;KB raw, most of it the two licence notices; the
+            script is about 3&nbsp;KB. No requests, no animation frames: everything is CSS keyframes on
+            <code>transform</code> and <code>opacity</code>.</li>
+        <li><strong>Frames:</strong> the script adds <code>vs-paused</code> while a spinner is scrolled offscreen or the tab is hidden.</li>
+        <li><strong>Accessibility:</strong> <code>role="status"</code> with visually-hidden text (<code>vs-sr</code>), added a frame after insert so it is announced. Under
+            <code>prefers-reduced-motion</code> nothing travels; the spinner holds still and breathes in opacity.</li>
+        <li><strong>Licence:</strong> upstream is MIT, and so is Halogen, which it is based on. Both notices are in the stylesheet header.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script src="vue-spinners.js"></script>
+<script>
+(function () {
+  var VARIANTS = [
+    ['clip',   'Clip',   'An open ring turns while it breathes in and out.',                  'ClipLoader'],
+    ['ring',   'Ring',   'Two rings tumble in 3D, one bold and one faint.',                   'RingLoader'],
+    ['moon',   'Moon',   'A small moon runs round a faint ring.',                             'MoonLoader'],
+    ['dot',    'Dot',    'Two dots swell and shrink at opposite ends of a turning bar.',      'DotLoader'],
+    ['bounce', 'Bounce', 'Two translucent discs swell in turn and blend where they overlap.', 'BounceLoader'],
+    ['pulse',  'Pulse',  'Three dots shrink in sequence with an overshoot.',                  'PulseLoader'],
+    ['sync',   'Sync',   'Three dots dip and rise in a wave.',                                'SyncLoader'],
+    ['grid',   'Grid',   'Nine dots flicker on their own clocks.',                            'GridLoader']
+  ];
+
+  var RECOMMEND = [
+    ['clip',   'Buttons and inline status, 16 to 24px', 'A single stroke is the most legible shape at small sizes.'],
+    ['moon',   'Beside text, table rows',               'The track plus one moving dot stays clear at 20px.'],
+    ['pulse',  'Chat and "typing" indicators',          'A row of dots reads as a pending message.'],
+    ['sync',   'Inline waiting, short async work',      'The wave suggests data passing back and forth.'],
+    ['dot',    'Cards and list placeholders',           'Two dots are calm enough to repeat down a list.'],
+    ['bounce', 'Soft full-panel loading',               'Overlapping discs look like one breathing form.'],
+    ['grid',   'Dashboards and image tiles',            'Nine independent clocks never look like a loop.'],
+    ['ring',   'Full-page loading, 64 to 96px',         'The only 3D one; the rings need room to foreshorten.']
+  ];
+
+  var LADDER_SIZES = [16, 20, 24, 32, 48, 64, 96];
+  var state = { ink: 'accent', size: 64, ladder: 'ring' };
+  var instances = [];
+
+  function mountInto(host, variant, size, label) {
+    instances.push(VueSpinners.mount(host, { variant: variant, size: size, label: label }));
+  }
+
+  /* ---- build static scaffolding once ---- */
+  var grid = document.getElementById('grid');
+  VARIANTS.forEach(function (v) {
+    var el = document.createElement('div');
+    el.className = 'variant glass';
+    el.innerHTML =
+      '<div class="stage well stage-color" data-grid="' + v[0] + '"></div>' +
+      '<div class="meta">' +
+        '<div class="name">' + v[1] + '<code>.vs-' + v[0] + '</code></div>' +
+        '<div class="desc">' + v[2] + '</div>' +
+        '<div class="from">from upstream ' + v[3] + '</div>' +
+      '</div>';
+    grid.appendChild(el);
+  });
+
+  var ladderSeg = document.getElementById('seg-ladder');
+  VARIANTS.forEach(function (v) {
+    var b = document.createElement('button');
+    b.dataset.v = v[0];
+    b.textContent = v[1];
+    b.setAttribute('aria-pressed', String(v[0] === state.ladder));
+    ladderSeg.appendChild(b);
+  });
+
+  var recBody = document.querySelector('#rec tbody');
+  RECOMMEND.forEach(function (r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="st"><span class="vs-slot stage-color" data-rec="' + r[0] + '"></span><code>.vs-' + r[0] +
+                   '</code></td><td>' + r[1] + '</td><td>' + r[2] + '</td>';
+    recBody.appendChild(tr);
+  });
+
+  var ladder = document.getElementById('ladder');
+  function buildLadder() {
+    ladder.innerHTML = '';
+    LADDER_SIZES.forEach(function (sz) {
+      var cell = document.createElement('div');
+      cell.className = 'cell glass';
+      cell.innerHTML = '<div class="slot well stage-color" data-size="' + sz + '"></div><div class="cap">' + sz + ' px</div>';
+      ladder.appendChild(cell);
+    });
+  }
+
+  /* ---- mount (and re-mount) every spinner ---- */
+  function render() {
+    instances.forEach(function (s) { s.destroy(); });
+    instances = [];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-grid]'), function (h) {
+      mountInto(h, h.dataset.grid, state.size, h.dataset.grid);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.ladder .slot'), function (h) {
+      mountInto(h, state.ladder, Number(h.dataset.size), 'Loading');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rec]'), function (h) {
+      mountInto(h, h.dataset.rec, 20, h.dataset.rec);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.slot[data-variant]'), function (h) {
+      mountInto(h, h.dataset.variant, Number(h.dataset.size), h.dataset.label);
+    });
+  }
+
+  function segment(id, key, after) {
+    var root = document.getElementById(id);
+    root.addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      state[key] = btn.dataset.v;
+      Array.prototype.forEach.call(root.querySelectorAll('button'), function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      after();
+    });
+  }
+  segment('seg-ink', 'ink', function () { document.body.dataset.ink = state.ink; });
+  segment('seg-ladder', 'ladder', render);
+
+  var size = document.getElementById('size');
+  var sizeVal = document.getElementById('size-val');
+  size.addEventListener('input', function () {
+    state.size = Number(size.value);
+    sizeVal.textContent = state.size + 'px';
+    render();
+  });
+
+  buildLadder();
+  render();
+
+  /* ---- copy snippet ---- */
+  var copyBtn = document.getElementById('copy');
+  copyBtn.addEventListener('click', function () {
+    var text = document.getElementById('snippet').textContent;
+    var done = function () {
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = 'Copy snippet'; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { copyBtn.textContent = 'Copy failed'; });
+    } else {
+      copyBtn.textContent = 'Copy failed';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -4,33 +4,70 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Orb Loaders — catalogue</title>
+<link rel="icon" href="data:," />
 <link rel="stylesheet" href="assets/glass.css" />
+<link rel="stylesheet" href="loaders/agent-thinking/agent-thinking.css" />
+<link rel="stylesheet" href="loaders/web-search/web-search.css" />
+<link rel="stylesheet" href="loaders/think-shimmer/think-shimmer.css" />
+<link rel="stylesheet" href="loaders/border-beam/border-beam.css" />
+<link rel="stylesheet" href="loaders/three-dots/three-dots.css" />
+<link rel="stylesheet" href="loaders/css-spinners/css-spinners.css" />
+<link rel="stylesheet" href="loaders/css-loaders/css-loaders.css" />
+<link rel="stylesheet" href="loaders/vue-spinners/vue-spinners.css" />
+<link rel="stylesheet" href="loaders/spinkit/spinkit.css" />
+<link rel="stylesheet" href="loaders/activity-indicators/activity-indicators.css" />
 <script src="assets/theme.js"></script>
 <style>
   /* Page-specific layout only — tokens and glass come from glass.css. */
 
   main{padding:30px 32px 90px; max-width:1000px; margin:0 auto}
+  section + section{margin-top:34px}
   h2{
     font-size:11px; font-weight:600; letter-spacing:.10em; text-transform:uppercase;
     color:var(--muted); margin-bottom:14px;
     font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   }
 
-  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr)); gap:16px}
   .card{
-    padding:20px; text-decoration:none; color:inherit; display:block;
+    position:relative; padding:20px;
     transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
   }
-  .card:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--line-strong)}
+  .card:hover,.card:focus-within{transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:var(--line-strong)}
   .card h3{font-size:14px; font-weight:650; letter-spacing:-.01em}
+  .card h3 a{color:inherit; text-decoration:none}
+  /* The whole card is the link; the preview is decorative and inert. */
+  .card h3 a::after{content:""; position:absolute; inset:0; border-radius:inherit}
+  .card h3 a:focus-visible{outline:none}
+  .card h3 a:focus-visible::after{outline:2px solid var(--accent); outline-offset:2px}
   .card p{font-size:12.5px; color:var(--muted); margin-top:6px}
   .card .tags{margin-top:14px; display:flex; flex-wrap:wrap; gap:6px}
+  .card .credit{margin-top:12px; font-size:11.5px}
 
-  /* A live orb on each card — the catalogue shows the thing, not a screenshot. */
+  /* A live loader on each card — the catalogue shows the thing, not a screenshot. */
   .card .preview{
     display:flex; align-items:center; justify-content:center;
-    min-height:118px; margin-bottom:16px; padding:12px;
+    min-height:118px; margin-bottom:16px; padding:12px; overflow:hidden;
+    color:var(--accent-ink);
   }
+  .preview[data-preview="agent-thinking"],
+  .preview[data-preview="web-search"],
+  .preview[data-preview="think-shimmer"]{color:var(--ink)}
+
+  /* Busy-state hosts — fills come from the shared tokens so both themes read. */
+  .pv-metal{
+    appearance:none; border:0; font:inherit; font-size:13px; font-weight:600;
+    height:36px; padding:0 20px; border-radius:18px; white-space:nowrap;
+    background:var(--bg); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line-strong);
+  }
+  .pv-beam{
+    display:flex; align-items:center; justify-content:center;
+    width:150px; height:56px; border-radius:14px; font-size:13px; font-weight:600;
+    background:var(--bg); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line-strong);
+  }
+
+  /* CSS-only previews have no JS loop to stop, so the page pauses them offscreen or in a hidden tab. */
+  .pv-paused, .pv-paused *{animation-play-state:paused !important}
 
   footer{
     margin-top:36px; font-size:12.5px; color:var(--muted);
@@ -44,7 +81,7 @@
   <div class="bar">
     <div>
       <h1>Orb <span>Loaders</span></h1>
-      <p>Loading indicators — orbs, spinners, progress animations — collected from around the web,
+      <p>17 loading indicators — orbs, spinners, progress animations — collected from around the web,
          each vendored as a self-contained, dependency-free drop-in with its own demo page and licence note.</p>
     </div>
     <button class="theme-toggle" type="button">
@@ -63,48 +100,364 @@
 </header>
 
 <main>
-  <h2>Loaders</h2>
-  <div class="grid">
-    <a class="card glass" href="loaders/thinking-orbs/index.html">
-      <div class="preview well" id="preview-thinking-orbs"></div>
-      <h3>Thinking Orbs</h3>
-      <p>Nine animated states — working, searching, solving, listening, connecting, weaving,
-         composing, breathing, shaping. Canvas 2D, six palettes, light and dark.</p>
+  <section aria-labelledby="g0">
+    <h2 id="g0">AI &amp; agent indicators</h2>
+    <div class="grid">
+    <article class="card glass">
+      <div class="preview well" data-preview="thinking-orbs" aria-hidden="true" inert></div>
+      <h3><a href="loaders/thinking-orbs/">Thinking Orbs</a></h3>
+      <p>Nine animated states — working, searching, solving, listening, connecting, weaving, composing, breathing, shaping. Canvas 2D, six palettes, light and dark.</p>
       <div class="tags">
         <span class="tag">vanilla JS</span>
         <span class="tag">canvas</span>
         <span class="tag">MIT</span>
       </div>
-    </a>
-  </div>
+      <p class="credit">after Jakub Antalik</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="thinking-orbs-extended" aria-hidden="true" inert></div>
+      <h3><a href="loaders/thinking-orbs-extended/">Thinking Orbs Extended</a></h3>
+      <p>Eight more states (syncing, evolving, building, hypercube, conjuring, conjuring static, assembling, blooming) from the SolidJS port. Canvas 2D, six palettes, light and dark. Same options as Thinking Orbs.</p>
+      <div class="tags">
+        <span class="tag">vanilla JS</span>
+        <span class="tag">canvas</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Mvkweb and Jakub Antalik</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="agent-thinking" aria-hidden="true" inert></div>
+      <h3><a href="loaders/agent-thinking/">Agent Thinking</a></h3>
+      <p>Collapsible reasoning stream that folds into “Thought for 6s”. Pausable timer, follows the newest line.</p>
+      <div class="tags">
+        <span class="tag">DOM</span>
+        <span class="tag">CSS</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Mvkweb, Jakub Antalik and Alex Brinza</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="web-search" aria-hidden="true" inert></div>
+      <h3><a href="loaders/web-search/">Web Search Radar</a></h3>
+      <p>Live source discovery: dots, spinning globe, tick. Headline flips to “Searched N sources”.</p>
+      <div class="tags">
+        <span class="tag">DOM</span>
+        <span class="tag">SVG</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Mvkweb, Jakub Antalik and Alex Brinza</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="think-shimmer" aria-hidden="true" inert></div>
+      <h3><a href="loaders/think-shimmer/">Think Shimmer</a></h3>
+      <p>AI “thinking” text and status indicators after Ant Design X’s Think component. Text sweep, typing dots, verb cycle, collapsible thought header and step chain, each with a done transition.</p>
+      <div class="tags">
+        <span class="tag">CSS + JS</span>
+        <span class="tag">MIT</span>
+        <span class="tag">text</span>
+        <span class="tag">5 variants</span>
+      </div>
+      <p class="credit">after Ant Design X</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="voice-orbs" aria-hidden="true" inert></div>
+      <h3><a href="loaders/voice-orbs/">Voice Orbs</a></h3>
+      <p>Five audio-reactive voice-assistant orbs (dots, lines, ring, bars, core) on one 7-state contract. Raw canvas port of VoiceOrbs.</p>
+      <div class="tags">
+        <span class="tag">canvas 2D</span>
+        <span class="tag">vanilla JS</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Alexis Muñoz</p>
+    </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="g1">
+    <h2 id="g1">Orbs &amp; globes</h2>
+    <div class="grid">
+    <article class="card glass">
+      <div class="preview well" data-preview="globe-orb" aria-hidden="true" inert></div>
+      <h3><a href="loaders/globe-orb/">Globe Orb</a></h3>
+      <p>Five dotted-globe states after Shu Ding’s cobe: searching, connecting, syncing, idle, inline. WebGL, one shared context, light and dark.</p>
+      <div class="tags">
+        <span class="tag">vanilla JS</span>
+        <span class="tag">WebGL</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Shu Ding</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="particle-orbs" aria-hidden="true" inert></div>
+      <h3><a href="loaders/particle-orbs/">Particle Orbs</a></h3>
+      <p>Four WebGL particle loaders ported from Yoichi Kobayashi’s sketch-threejs: ember, drift, swarm, bloom. One shared GL context, light and dark, CSS fallback.</p>
+      <div class="tags">
+        <span class="tag">vanilla JS</span>
+        <span class="tag">WebGL</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Yoichi Kobayashi</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="doodle-orbs" aria-hidden="true" inert></div>
+      <h3><a href="loaders/doodle-orbs/">Doodle Orbs</a></h3>
+      <p>Six generative orbs inspired by css-doodle: polar dot rings, spiral galaxy, petals, orbits, a breathing grid and arc rings. One 6 KB file, no JavaScript per frame.</p>
+      <div class="tags">
+        <span class="tag">vanilla JS</span>
+        <span class="tag">DOM + CSS</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Yuan Chuan (css-doodle)</p>
+    </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="g2">
+    <h2 id="g2">Busy states</h2>
+    <div class="grid">
+    <article class="card glass">
+      <div class="preview well" data-preview="metal-ring" aria-hidden="true" inert><button class="pv-metal" type="button" tabindex="-1">Generating…</button></div>
+      <h3><a href="loaders/metal-ring/">Metal Ring</a></h3>
+      <p>A liquid-metal WebGL ring around a button, chip or input to show it is busy. Six presets; a static CSS ring when WebGL is missing.</p>
+      <div class="tags">
+        <span class="tag">WebGL</span>
+        <span class="tag">vanilla JS</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Mvkweb, Jakub Antalik and Alex Brinza</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="border-beam" aria-hidden="true" inert><div class="pv-beam">Uploading…</div></div>
+      <h3><a href="loaders/border-beam/">Border Beam</a></h3>
+      <p>A glowing border that travels or breathes around a card, input or button. Pure CSS animation, four modes, four palettes.</p>
+      <div class="tags">
+        <span class="tag">CSS</span>
+        <span class="tag">vanilla JS</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Mvkweb, Jakub Antalik and Alex Brinza</p>
+    </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="g3">
+    <h2 id="g3">CSS spinners</h2>
+    <div class="grid">
+    <article class="card glass">
+      <div class="preview well" data-preview="three-dots" aria-hidden="true" inert><div class="td-pulse" style="--td-size:10px;color:var(--accent)"></div></div>
+      <h3><a href="loaders/three-dots/">Three Dots</a></h3>
+      <p>Eight single-element dot loaders from Zongbin’s three-dots: pulse, typing, windmill and more. One div, one custom property, plain CSS.</p>
+      <div class="tags">
+        <span class="tag">CSS only</span>
+        <span class="tag">MIT</span>
+        <span class="tag">8 variants</span>
+      </div>
+      <p class="credit">after Zongbin</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="css-spinners" aria-hidden="true" inert><div class="cs-ring" style="--cs-size:84px"><div></div><div></div><div></div><div></div></div></div>
+      <h3><a href="loaders/css-spinners/">CSS Spinners</a></h3>
+      <p>Eight classic spinners from loading.io (Taipei), resized from one property and recoloured with currentColor.</p>
+      <div class="tags">
+        <span class="tag">CSS only</span>
+        <span class="tag">CC0</span>
+        <span class="tag">8 variants</span>
+      </div>
+      <p class="credit">after loading.io</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="css-loaders" aria-hidden="true" inert><span class="cl-orbit" style="--cl-size:84px"></span></div>
+      <h3><a href="loaders/css-loaders/">CSS Loaders</a></h3>
+      <p>Eight single-element ring and orb loaders: arc, sweep, orbit, ripple and more. Plain CSS, currentColor, --cl-size.</p>
+      <div class="tags">
+        <span class="tag">CSS only</span>
+        <span class="tag">8 variants</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after Vineeth TR</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="vue-spinners" aria-hidden="true" inert></div>
+      <h3><a href="loaders/vue-spinners/">Vue Spinners</a></h3>
+      <p>Eight spinners extracted from vue-spinner (greyby, after Halogen by Yuanyan Cao), no Vue. 3D rings, moon, bounce, pulse, grid. Optional mount helper.</p>
+      <div class="tags">
+        <span class="tag">CSS + tiny JS</span>
+        <span class="tag">8 variants</span>
+        <span class="tag">MIT</span>
+      </div>
+      <p class="credit">after greyby (vue-spinner), after Halogen</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="spinkit" aria-hidden="true" inert><div class="sk-chase" style="--sk-size:84px"><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i><i class="sk-chase-dot"></i></div></div>
+      <h3><a href="loaders/spinkit/">SpinKit</a></h3>
+      <p>Eight CSS-only spinners from Tobias Ahlin’s SpinKit (Android port by ybq), retuned: currentColor, one size variable, calm reduced-motion fallback.</p>
+      <div class="tags">
+        <span class="tag">CSS</span>
+        <span class="tag">MIT</span>
+        <span class="tag">8 variants</span>
+      </div>
+      <p class="credit">after Tobias Ahlin</p>
+    </article>
+    <article class="card glass">
+      <div class="preview well" data-preview="activity-indicators" aria-hidden="true" inert><div class="ai-ball-clip-rotate-multiple" style="--ai-size:84px"><div></div><div></div></div></div>
+      <h3><a href="loaders/activity-indicators/">Activity Indicators</a></h3>
+      <p>Eight CSS loaders from Loaders.css, the web originals behind NVActivityIndicatorView, now scaling from one size value.</p>
+      <div class="tags">
+        <span class="tag">CSS</span>
+        <span class="tag">MIT</span>
+        <span class="tag">8 variants</span>
+      </div>
+      <p class="credit">after Connor Atherton (Loaders.css)</p>
+    </article>
+    </div>
+  </section>
 
   <footer>
     Each loader keeps its upstream licence and attribution in its own file header.
-    See the <a href="https://github.com/boazcstrike/orb-loaders">repository README</a> for how to add one.
+    See <a href="https://github.com/boazcstrike/orb-loaders/blob/main/docs/references.md">References and credits</a>, or the
+    <a href="https://github.com/boazcstrike/orb-loaders">repository README</a> for how to add one.
   </footer>
 </main>
 
 <script src="loaders/thinking-orbs/thinking-orb.js"></script>
+<script src="loaders/thinking-orbs-extended/thinking-orb-extended.js"></script>
+<script src="loaders/agent-thinking/agent-thinking.js"></script>
+<script src="loaders/web-search/web-search.js"></script>
+<script src="loaders/think-shimmer/think-shimmer.js"></script>
+<script src="loaders/voice-orbs/voice-orbs.js"></script>
+<script src="loaders/globe-orb/globe-orb.js"></script>
+<script src="loaders/particle-orbs/particle-orbs.js"></script>
+<script src="loaders/doodle-orbs/doodle-orbs.js"></script>
+<script src="loaders/metal-ring/metal-ring.js"></script>
+<script src="loaders/border-beam/border-beam.js"></script>
+<script src="loaders/vue-spinners/vue-spinners.js"></script>
 <script>
 (function () {
-  var host = document.getElementById('preview-thinking-orbs');
-  if (!host) return;
-  var orb = null;
+  var PREVIEW_SIZE = 84;
 
-  function paint() {
-    if (orb) orb.destroy();
-    orb = ThinkingOrb.mount(host, {
-      state: 'breathing',
-      size: 84,
-      palette: 'violet',
-      theme: (window.OrbTheme && window.OrbTheme.current()) || 'light',
-      zoom: true,
-      label: 'Thinking Orbs preview'
+  function theme() {
+    return (window.OrbTheme && window.OrbTheme.current()) || 'light';
+  }
+
+  // How each live preview follows the page theme:
+  //   'set'      the handle has setTheme()
+  //   'remount'  the handle has no setTheme(), so it is destroyed and mounted again
+  //   'self'     the loader listens for themechange itself, or draws with currentColor
+  var PREVIEWS = {
+    'thinking-orbs': { follow: 'remount', mount: function (host) {
+      return ThinkingOrb.mount(host, { state: 'breathing', size: PREVIEW_SIZE, palette: 'violet',
+        theme: theme(), zoom: true, label: 'Thinking Orbs preview' });
+    } },
+    'thinking-orbs-extended': { follow: 'remount', mount: function (host) {
+      return ThinkingOrbX.mount(host, { state: 'blooming', size: PREVIEW_SIZE, palette: 'violet',
+        theme: theme(), zoom: true });
+    } },
+    'agent-thinking': { follow: 'self', mount: function (host) {
+      return AgentThinking.mount(host, { size: 10, width: 220, loop: true, autoCollapse: false,
+        reserveSpace: false, delays: [700, 900],
+        sentences: ['Reading the request and the open file.', 'Planning a smaller patch with a test.'] });
+    } },
+    'web-search': { follow: 'self', mount: function (host) {
+      return WebSearchRadar.mount(host, { size: 10, width: 220, loop: true, query: 'token verification',
+        sites: [
+          { title: 'Verifying tokens', url: 'docs.example.org/guides', discover: 500, finish: 1800 },
+          { title: 'Middleware guide', url: 'example.com/handbook', discover: 1100, finish: 2800 }
+        ] });
+    } },
+    'think-shimmer': { follow: 'self', mount: function (host) {
+      return ThinkShimmer.mount(host, { variant: 'cycle', size: 14 });
+    } },
+    'voice-orbs': { follow: 'self', mount: function (host) {
+      return VoiceOrbs.mount(host, { orb: 'particles', state: 'listening', size: PREVIEW_SIZE });
+    } },
+    'globe-orb': { follow: 'self', mount: function (host) {
+      return GlobeOrb.mount(host, { variant: 'connecting', size: PREVIEW_SIZE });
+    } },
+    'particle-orbs': { follow: 'set', mount: function (host) {
+      return ParticleOrbs.mount(host, { variant: 'ember', size: PREVIEW_SIZE, theme: theme() });
+    } },
+    'doodle-orbs': { follow: 'self', mount: function (host) {
+      return DoodleOrbs.mount(host, { variant: 'spiral-galaxy', size: PREVIEW_SIZE, color: 'var(--accent-ink)' });
+    } },
+    'metal-ring': { follow: 'set', mount: function (host) {
+      return MetalRing.mount(host.querySelector('.pv-metal'), { preset: 'blueberry', variant: 'button', theme: theme() });
+    } },
+    'border-beam': { follow: 'set', mount: function (host) {
+      return BorderBeam.mount(host.querySelector('.pv-beam'), { mode: 'travel', palette: 'spectrum', theme: theme() });
+    } },
+    'vue-spinners': { follow: 'self', mount: function (host) {
+      return VueSpinners.mount(host, { variant: 'ring', size: PREVIEW_SIZE });
+    } }
+  };
+
+  var live = [];
+
+  Object.keys(PREVIEWS).forEach(function (id) {
+    var host = document.querySelector('[data-preview="' + id + '"]');
+    if (!host) return;
+    try {
+      live.push({ id: id, host: host, spec: PREVIEWS[id], handle: PREVIEWS[id].mount(host) });
+    } catch (err) {
+      console.error('Preview "' + id + '" failed to mount:', err);
+    }
+  });
+
+  // CSS-only previews: pause while offscreen or when the tab is hidden.
+  var CSS_ONLY = ['three-dots', 'css-spinners', 'css-loaders', 'spinkit', 'activity-indicators'];
+  var cssHosts = [];
+  CSS_ONLY.forEach(function (id) {
+    var host = document.querySelector('[data-preview="' + id + '"]');
+    if (host) cssHosts.push({ host: host, onscreen: true });
+  });
+
+  function syncCssPaused() {
+    cssHosts.forEach(function (c) {
+      c.host.classList.toggle('pv-paused', document.visibilityState === 'hidden' || !c.onscreen);
     });
   }
 
-  window.addEventListener('themechange', paint);
-  paint();
+  if (window.IntersectionObserver) {
+    var cssIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        cssHosts.forEach(function (c) { if (c.host === e.target) c.onscreen = e.isIntersecting; });
+      });
+      syncCssPaused();
+    });
+    cssHosts.forEach(function (c) { cssIo.observe(c.host); });
+  }
+  document.addEventListener('visibilitychange', syncCssPaused);
+
+  // Leaving the page for good (not entering the back/forward cache): release every live handle.
+  // A persisted pagehide keeps the handles so a bfcache restore resumes as it was.
+  window.addEventListener('pagehide', function (event) {
+    if (event.persisted) return;
+    live.forEach(function (entry) {
+      try {
+        entry.handle.destroy();
+      } catch (err) {
+        console.error('Preview "' + entry.id + '" failed to destroy:', err);
+      }
+    });
+    live = [];
+  });
+
+  window.addEventListener('themechange', function () {
+    live = live.map(function (entry) {
+      try {
+        if (entry.spec.follow === 'set') {
+          entry.handle.setTheme(theme());
+        } else if (entry.spec.follow === 'remount') {
+          // Mount the new handle before destroying the old one, so a failed mount leaves the card showing its loader.
+          var next = entry.spec.mount(entry.host);
+          entry.handle.destroy();
+          return { id: entry.id, host: entry.host, spec: entry.spec, handle: next };
+        }
+      } catch (err) {
+        console.error('Preview "' + entry.id + '" failed to follow the theme:', err);
+      }
+      return entry;
+    });
+  });
 }());
 </script>
 
